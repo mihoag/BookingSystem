@@ -31,25 +31,24 @@ import java.awt.event.ActionEvent;
 
 public class ConfigServerScreen extends JFrame {
 
-	private JPanel contentPane;
-	public JTextField timeStartText;
-	public JTextField timeEndText;
-	public JComboBox<String> movieTimeCombobox;
-	private DefaultComboBoxModel<String> modelCombobox;
-	private JLabel header; 
-	private JLabel movieTimeLabel;
+	
 	private JPanel stageMapPanel;
+	private JLabel header; 
+	private JPanel screenMoviePanel;
+	private JLabel movieTimeLabel;
+	public DefaultComboBoxModel<String> modelCombobox;
+	private JComboBox movieTimeCombobox;
+	public JButton stageConfigButton;
 	private JLabel userAccessNumLabel;
-	private JLabel timeStartLabel;
 	private JLabel movieTimeConfigLabel;
+	private JLabel timeStartLabel;
 	private JLabel timeEndLabel;
 	public JButton createTimeBtn;
-	public JButton deleteTimeBtn;
-	public JButton stageConfigButton;
-	private JPanel screenMoviePanel;
-	private JLabel lblNewLabel;
+	public JButton deleteTimeBtn;	
 	private MovieTimeService movieTimeService;
-	
+	public JTextField timeStartText;
+	public JTextField timeEndText;
+
 	/**
 	 * Launch the application.
 	*/
@@ -150,24 +149,84 @@ public class ConfigServerScreen extends JFrame {
 	{
 	
 		
-		stageMapPanel = new JPanel();
-		contentPane.add(stageMapPanel);
-		stageMapPanel.setBounds(10, 138, 558, 398);
-	    stageMapPanel.setLayout(new BorderLayout(0, 0));
-		 
-	    screenMoviePanel = new JPanel();
-	    screenMoviePanel.setBackground(new Color(0, 0, 0));
-        stageMapPanel.add(screenMoviePanel, BorderLayout.SOUTH);
-        
-        lblNewLabel = new JLabel("Màn hình chiếu phim");
-        lblNewLabel.setForeground(new Color(255, 255, 255));
-        lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 20));
-        screenMoviePanel.add(lblNewLabel);
-		initData();
 	}
 	
 	public ConfigServerScreen()
 	{
+		setIconImage(Toolkit.getDefaultToolkit().getImage(ConfigServerScreen.class.getResource("/assets/serverIcon.png")));
+		getContentPane().setBackground(new Color(236, 200, 123));
+		getContentPane().setLayout(null);
+		ConfigServerScreenController ac = new ConfigServerScreenController(this);
 		
+		
+		header = new JLabel("HỆ THỐNG QUẢN LÍ ĐẶT VÉ XEM PHIM");
+		header.setFont(new Font("Tahoma", Font.BOLD, 30));
+		header.setBounds(115, 0, 753, 98);
+		getContentPane().add(header);
+		
+		screenMoviePanel = new JPanel();
+		screenMoviePanel.setBounds(10, 141, 561, 392);
+		getContentPane().add(screenMoviePanel);
+		
+		movieTimeLabel = new JLabel("Suất chiếu:");
+		movieTimeLabel.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		movieTimeLabel.setBounds(10, 81, 141, 50);
+		getContentPane().add(movieTimeLabel);
+		
+		movieTimeCombobox = new JComboBox();
+		movieTimeCombobox.setBounds(125, 92, 193, 33);
+		getContentPane().add(movieTimeCombobox);
+		
+		stageConfigButton = new JButton("Cấu hình sân khấu");
+		stageConfigButton.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		stageConfigButton.setBounds(366, 92, 205, 33);
+		getContentPane().add(stageConfigButton);
+		
+		userAccessNumLabel = new JLabel("Số lượng người đang truy cập");
+		userAccessNumLabel.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		userAccessNumLabel.setBounds(581, 141, 287, 43);
+		getContentPane().add(userAccessNumLabel);
+		
+		movieTimeConfigLabel = new JLabel("Cấu hình suất chiếu");
+		movieTimeConfigLabel.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		movieTimeConfigLabel.setBounds(581, 194, 287, 43);
+		
+		getContentPane().add(movieTimeConfigLabel);
+		
+		timeStartLabel = new JLabel("Giờ bắt đầu");
+		timeStartLabel.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		timeStartLabel.setBounds(581, 238, 133, 43);
+		getContentPane().add(timeStartLabel);
+		
+		timeEndLabel = new JLabel("Giờ kết thúc");
+		timeEndLabel.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		timeEndLabel.setBounds(581, 285, 141, 43);
+		getContentPane().add(timeEndLabel);
+		
+		
+		
+		createTimeBtn = new JButton("Thêm");
+		createTimeBtn.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		createTimeBtn.setBounds(613, 354, 85, 35);
+		getContentPane().add(createTimeBtn);
+		
+		deleteTimeBtn = new JButton("Xóa");
+		deleteTimeBtn.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		deleteTimeBtn.setBounds(738, 354, 85, 35);
+		getContentPane().add(deleteTimeBtn);
+		
+		timeStartText = new JTextField();
+		timeStartText.setBounds(697, 238, 150, 34);
+		getContentPane().add(timeStartText);
+		timeStartText.setColumns(10);
+		
+		timeEndText = new JTextField();
+		timeEndText.setColumns(10);
+		timeEndText.setBounds(697, 291, 150, 34);
+		getContentPane().add(timeEndText);
+		this.setSize(901, 600);
+		setBackground(new Color(236, 200, 123));
+		setLocationRelativeTo(null);
+	    setDefaultCloseOperation(EXIT_ON_CLOSE);
 	}
 }
