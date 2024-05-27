@@ -246,11 +246,13 @@ public class ConfigServerScreen extends JFrame {
 		getContentPane().add(deleteTimeBtn);
 		
 		timeStartText = new JTextField();
+		timeStartText.setFont(new Font("Tahoma", Font.PLAIN, 20));
 		timeStartText.setBounds(697, 238, 150, 34);
 		getContentPane().add(timeStartText);
 		timeStartText.setColumns(10);
 		
 		timeEndText = new JTextField();
+		timeEndText.setFont(new Font("Tahoma", Font.PLAIN, 20));
 		timeEndText.setColumns(10);
 		timeEndText.setBounds(697, 291, 150, 34);
 		getContentPane().add(timeEndText);
