@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JOptionPane;
 
+import Utils.TimeZoneUtitls;
 import service.MovieTimeService;
 import views.ConfigServerScreen;
 import views.SeatConfigScreen;
@@ -35,7 +36,7 @@ public class ConfigServerScreenController implements ActionListener{
 				if(check)
 				{
 					JOptionPane.showMessageDialog(view, "Thêm suất chiếu thành công");
-					this.view.updateMovieTimeCombobox();
+					this.view.updateMovieTimeCombobox(TimeZoneUtitls.getTimeZoneValueAsString(fromTime, toTime));
 				}
 				else
 				{

@@ -22,6 +22,8 @@ public class SeatConfigScreenController implements ActionListener{
 		service = new MovieTimeService();
 	}
 	
+	
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
@@ -40,6 +42,7 @@ public class SeatConfigScreenController implements ActionListener{
 	 	           JOptionPane.showMessageDialog(view, "Thêm khu thành công");
 	 	           // updata table
 	 	           view.zoneInfoTableModel.addRow(new Object[] {name, rowNum, seatNumPerRow, price});
+	 	           view.resetTextField();
 	 	           // update seat map
 	 	           serverView.updateSeatMap();
 	 	        }
@@ -52,6 +55,29 @@ public class SeatConfigScreenController implements ActionListener{
 				JOptionPane.showMessageDialog(view, e2.getMessage());
 			}
 	     } 
+	     else if(e.getSource() == view.deleteBtn)
+	     {
+	        try {
+	        	int cnt =  view.zoneInfoTable.getSelectedRow();
+				String zoneName = (String) view.zoneInfoTable.getValueAt(cnt, 0);
+				Boolean check = service.deleteZoneByName(zoneName);
+				
+				if(check)
+				{
+				   view.updateZoneTable();
+				   serverView.updateSeatMap();
+				   JOptionPane.showMessageDialog(view, "Xóa khu thành công");
+			    }
+				else
+				{
+					JOptionPane.showMessageDialog(view, "Xóa khu thất bại");
+				}
+				
+			} catch (Exception e2) {
+				// TODO: handle exception
+				JOptionPane.showMessageDialog(view, e2.getMessage());
+			}
+	     }
 	}
 
 }

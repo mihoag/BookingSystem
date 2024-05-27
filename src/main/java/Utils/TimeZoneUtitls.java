@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TimeZoneSplitUtitls {
+public class TimeZoneUtitls {
 	
 	private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 	
@@ -29,4 +29,10 @@ public class TimeZoneSplitUtitls {
     	
     	return timeComponents;
     }
+    
+    public static String getTimeZoneValueAsString(String fromTime, String toTime)
+    {
+    	return fromTime + "-" + toTime;
+    }
+   
 }

@@ -41,13 +41,13 @@ public class MovieTheater implements Serializable {
 	   this.listZone.remove(zone);
    }
    
-   public void sortZoneDescByPrice()
+   public List<Zone> sortZoneASCByPrice()
    {
 	  Collections.sort(this.listZone, new Comparator<Zone>() {
       @Override
       public int compare(Zone o1, Zone o2) {
 			// TODO Auto-generated method stub
-		    Double delta =  o2.getPrice() - o1.getPrice();
+		    Double delta =  o1.getPrice() - o2.getPrice();
 		    if(delta > 0)
 		    {
 		    	return 1;
@@ -59,5 +59,6 @@ public class MovieTheater implements Serializable {
             return 0;
 		}
 	});
+	return this.listZone;
    }
 }

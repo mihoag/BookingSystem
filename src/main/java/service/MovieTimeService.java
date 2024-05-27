@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import Utils.TimeZoneUtitls;
 import models.MovieTheater;
 import models.MovieTime;
 import models.Zone;
@@ -26,7 +27,8 @@ public class MovieTimeService {
          {
         	 for(MovieTime movieTime : listMovieTimes)
         	 {
-        		movieTimeAsString.add(movieTime.getFromTime().format(formatter) + "-" + movieTime.getToTime().format(formatter));
+        		//movieTime.getFromTime().format(formatter) + "-" + movieTime.getToTime().format(formatter)
+        		movieTimeAsString.add(TimeZoneUtitls.getTimeZoneValueAsString(movieTime.getFromTime().format(formatter), movieTime.getToTime().format(formatter)));
         	 } 
          }
     	 return movieTimeAsString;
@@ -50,7 +52,10 @@ public class MovieTimeService {
 		    		return false;
 		    	}
 		    }
-		    listMovieTimes.add(new MovieTime(fromLocalTime, toLocalTime));
+		    
+		    MovieTime newMovieTime = new MovieTime(fromLocalTime, toLocalTime);
+		    newMovieTime.getMovieTheater().setListZone(cloneZoneMap());
+		    listMovieTimes.add(newMovieTime);
 		    MovieTimeRepository.getInstance().writeMovieTimeData(listMovieTimes);
 		    return true;
 	    	 
@@ -88,13 +93,18 @@ public class MovieTimeService {
     	 try {
 			 List<MovieTime> movieTimes;
 		     movieTimes = MovieTimeRepository.getInstance().getMovieTimes();
+		     boolean check = true;
 	    	 for(MovieTime movieTime : movieTimes)
 	    	 {
-	    	     movieTime.getMovieTheater().addZone(new Zone(name, rowNum, seatPerRow, price));
+	    	    check = movieTime.getMovieTheater().addZone(new Zone(name, rowNum, seatPerRow, price)) && check;
+	    	    if(!check)
+	    	    {
+	    	    	break;
+	    	    }
 	    	 }
 	    	 
 	    	 MovieTimeRepository.getInstance().writeMovieTimeData(movieTimes);
-	    	 return true;
+	    	 return check;
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -120,10 +130,55 @@ public class MovieTimeService {
 
      }
      
+     public boolean deleteZoneByName(String name)
+     {
+    	boolean check = false;
+    	Zone zone = new Zone(name);
+        try {
+			List<MovieTime> movieTimes = MovieTimeRepository.getInstance().getMovieTimes();
+			if(movieTimes != null)
+			{
+				for(MovieTime movieTime : movieTimes)
+				{
+			       movieTime.getMovieTheater().getListZone().remove(zone);
+			    }
+				// update file
+		        MovieTimeRepository.getInstance().writeMovieTimeData(movieTimes);
+				check = true;
+			}
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return check;
+     }
+    
+     public List<Zone> cloneZoneMap()
+     {
+    	List<Zone> listZone = new ArrayList<>();
+        
+    	try {
+			List<MovieTime> listMovieTime = MovieTimeRepository.getInstance().getMovieTimes();
+			if(listMovieTime != null && listMovieTime.size() > 0)
+			{
+				MovieTime movieTime = listMovieTime.get(0);
+				for(Zone zone : movieTime.getMovieTheater().getListZone())
+				{
+				    listZone.add(new Zone(zone.getName(), zone.getRowNum(), zone.getSeatsPerRow(), zone.getPrice()));
+				}
+			}
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return listZone;
+     }
+     
      public static void main(String[] args) throws ClassNotFoundException {
 	    MovieTimeService ser = new MovieTimeService();
 	    System.out.println(ser.addMovieTime("15:00:00", "17:00:00"));
-	    //List<String> ls = ser.getMovieTimeAsString();
+	    List<String> ls = ser.getMovieTimeAsString();
+	    System.out.println(ls.size());
 	}
      
      

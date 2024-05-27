@@ -19,6 +19,10 @@ public class Zone implements Serializable {
 		super();
 		// TODO Auto-generated constructor stub
 	}
+	public Zone(String name)
+	{
+		this.name = name;
+	}
 	
 	public Zone(String name,Integer rowNum, Integer seatsPerRow, Double price) {
 		super();

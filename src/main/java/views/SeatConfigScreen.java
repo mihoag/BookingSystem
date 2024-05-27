@@ -10,7 +10,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
 import controllers.SeatConfigScreenController;
-import models.MovieTime;
 import models.Zone;
 import service.MovieTimeService;
 
@@ -18,13 +17,12 @@ import java.awt.Toolkit;
 import javax.swing.JLabel;
 import java.awt.Font;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.JButton;
-import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.List;
-import java.awt.event.ActionEvent;
 
 public class SeatConfigScreen extends JFrame {
 
@@ -55,13 +53,77 @@ public class SeatConfigScreen extends JFrame {
 	 */
     public void initData()
     {
-       List<Zone> listZone = service.getListZones();
-       for(Zone zone : listZone)
-       {
-    	 System.out.println(zone.getName() + " " +  zone.getRowNum() + " " + zone.getSeatsPerRow() + " "+ zone.getPrice());
-    	 zoneInfoTableModel.addRow(new Object[] {zone.getName(), zone.getRowNum(), zone.getSeatsPerRow(), zone.getPrice()});  
-       }
+      updateZoneTable();
     }
+    
+    public void updateZoneTable()
+    {
+    	 zoneInfoTableModel.setRowCount(0);
+    	 List<Zone> listZone = service.getListZones();
+         for(Zone zone : listZone)
+         {
+      	 zoneInfoTableModel.addRow(new Object[] {zone.getName(), zone.getRowNum(), zone.getSeatsPerRow(), zone.getPrice()});  
+         }
+    }
+    
+    public void resetTextField()
+    {
+    	this.zoneNameTextField.setText("");
+    	this.priceTextField.setText("");
+    	this.rowNumTextField.setText("");
+    	this.seatNumPerRowText.setText("");
+    }
+    
+    public void setDataForTextField(String zoneName, Integer numRow, Integer seatPerRow, Double price)
+    {
+    	this.zoneNameTextField.setText(zoneName);
+    	this.rowNumTextField.setText(numRow + "");
+    	this.seatNumPerRowText.setText(seatPerRow + "");
+    	this.priceTextField.setText(price + "");
+    }
+    public void addMouseEventforJTable()
+	{
+            zoneInfoTable.addMouseListener(new MouseListener() {
+			
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// TODO Auto-generated method stub
+				int cnt = zoneInfoTable.getSelectedRow();
+				//
+				String zoneName = (String) zoneInfoTable.getValueAt(cnt, 0);
+				Integer rowNum = (Integer)zoneInfoTable.getValueAt(cnt, 1);
+				Integer seatPerRow = (Integer)zoneInfoTable.getValueAt(cnt, 2);
+				Double price = (Double)zoneInfoTable.getValueAt(cnt, 3);
+				
+				setDataForTextField(zoneName, rowNum, seatPerRow, price);
+			}
+		});      
+	}
+    
     
 	public SeatConfigScreen(ConfigServerScreen configScreen) {
 		this.configScreen = configScreen;
@@ -70,9 +132,10 @@ public class SeatConfigScreen extends JFrame {
 		setIconImage(Toolkit.getDefaultToolkit().getImage(SeatConfigScreen.class.getResource("/assets/serverIcon.png")));
 		setBounds(100, 100, 816, 525);
 		contentPane = new JPanel();
-		contentPane.setBackground(new Color(249, 207, 151));
+		contentPane.setBackground(new Color(236, 200, 123));
+	
+		
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
@@ -86,9 +149,9 @@ public class SeatConfigScreen extends JFrame {
 	    zoneInfoTableModel.addColumn("Số hàng");
 	    zoneInfoTableModel.addColumn("Số cột");
 	    zoneInfoTableModel.addColumn("Giá");
-	 
 	    
 		zoneInfoTable = new JTable(zoneInfoTableModel);
+		
 		zoneInfoTable.setBounds(27, 166, 745, 312);
 		
 	    JScrollPane sc = new JScrollPane(zoneInfoTable);
@@ -146,13 +209,27 @@ public class SeatConfigScreen extends JFrame {
 		contentPane.add(addBtn);
 		
 		deleteBtn = new JButton("Xóa");
-		
 		deleteBtn.setFont(new Font("Tahoma", Font.PLAIN, 20));
 		deleteBtn.setBounds(421, 124, 85, 39);
 		deleteBtn.addActionListener(ac);
 		contentPane.add(deleteBtn);
 	
 		setVisible(true);
+		
+		addMouseEventforJTable();
 		initData();
+	}
+	
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					SeatConfigScreen sc = new SeatConfigScreen(new ConfigServerScreen());
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
 	}
 }
