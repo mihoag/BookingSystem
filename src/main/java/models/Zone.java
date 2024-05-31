@@ -32,7 +32,12 @@ public class Zone implements Serializable {
 		this.seats = new ArrayList<>(rowNum);
 		for(int i = 0 ; i < rowNum ; i++)
 		{
-		   this.seats.add(new ArrayList<Seat>(seatsPerRow));
+		   ArrayList<Seat> seatRow = new ArrayList<>();
+		   for(int j = 0 ; j < seatsPerRow ; j++)
+		   {
+			   seatRow.add(new Seat());
+		   }
+		   this.seats.add(seatRow);
 		}
 		this.price = price;
 	}

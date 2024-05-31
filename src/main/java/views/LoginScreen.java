@@ -17,10 +17,14 @@ import java.awt.Color;
 import java.awt.Font;
 import javax.swing.JTextField;
 import javax.swing.JButton;
-import javax.swing.JFormattedTextField;
+
 
 public class LoginScreen extends JFrame {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	public JTextField usernameTextField;
 	public JTextField passwordTextField;
@@ -32,26 +36,15 @@ public class LoginScreen extends JFrame {
 	
 	/**
 	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					LoginScreen frame = new LoginScreen();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
+	*/
+	
 	/**
 	 * Create the frame.
 	 */
 	public LoginScreen() {
 		setIconImage(Toolkit.getDefaultToolkit().getImage(LoginScreen.class.getResource("/assets/serverIcon.png")));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setResizable(false);
 		setBounds(100, 100, 634, 516);
 		contentPane = new JPanel();
 		contentPane.setBackground(new Color(236, 200, 123));

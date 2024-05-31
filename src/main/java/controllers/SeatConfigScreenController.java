@@ -2,9 +2,11 @@ package controllers;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 import javax.swing.JOptionPane;
 
+import models.MovieTime;
 import service.MovieTimeService;
 import views.ConfigServerScreen;
 import views.SeatConfigScreen;
@@ -22,6 +24,11 @@ public class SeatConfigScreenController implements ActionListener{
 		service = new MovieTimeService();
 	}
 	
+	  
+    public void configBroadcast(List<MovieTime> movieTimes)
+    {
+    	this.serverView.serverThread.broadcast(movieTimes);
+    }
 	
 	
 	@Override
@@ -30,6 +37,15 @@ public class SeatConfigScreenController implements ActionListener{
 	     if(e.getSource() == view.addBtn)
 	     {
 	    	 try {
+	    		 
+	    		// Check if exist movie time
+	    		List<MovieTime> lsMovieTime = service.getMovieTimes();
+	    		if(lsMovieTime.size() == 0)
+	    		{
+	    			JOptionPane.showMessageDialog(view, "Danh sách suất chiếu đang rỗng. Cần thêm 1 suất chiếu trước!");
+	    			return;
+	    		}
+	    		 
 	    		String name = view.zoneNameTextField.getText();
 	 	        Integer rowNum = Integer.parseInt(view.rowNumTextField.getText());  
 	 	        Integer seatNumPerRow = Integer.parseInt(view.seatNumPerRowText.getText());
@@ -45,6 +61,9 @@ public class SeatConfigScreenController implements ActionListener{
 	 	           view.resetTextField();
 	 	           // update seat map
 	 	           serverView.updateSeatMap();
+	 	           // update client
+	 	           List<MovieTime> movieTimes = service.getMovieTimes();
+	 	           configBroadcast(movieTimes);
 	 	        }
 	 	        else
 	 	        {
@@ -66,6 +85,9 @@ public class SeatConfigScreenController implements ActionListener{
 				{
 				   view.updateZoneTable();
 				   serverView.updateSeatMap();
+				   // update client
+	 	           List<MovieTime> movieTimes = service.getMovieTimes();
+	 	           configBroadcast(movieTimes);  
 				   JOptionPane.showMessageDialog(view, "Xóa khu thành công");
 			    }
 				else

@@ -11,8 +11,11 @@ import Utils.TimeZoneUtitls;
 import controllers.ConfigServerScreenController;
 import models.MovieTheater;
 import models.MovieTime;
+import models.Seat;
 import models.Zone;
 import service.MovieTimeService;
+import threads.ServerThread;
+import threads.UserThread;
 
 import java.awt.Toolkit;
 import javax.swing.JLabel;
@@ -25,12 +28,23 @@ import javax.swing.JTextField;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.awt.event.ActionEvent;
 
 public class ConfigServerScreen extends JFrame {
-
+ 
+	private static final long serialVersionUID = 1L;
+	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+	
+	
+	// Components for UI
 	private JLabel header; 
 	private JPanel stageMapPanel;
 	private JLabel movieTimeLabel;
@@ -47,22 +61,17 @@ public class ConfigServerScreen extends JFrame {
 	public JTextField timeStartText;
 	public JTextField timeEndText;
 	private JPanel movieScreenPanel;
-	private JLabel lblNewLabel;
+	private JLabel movieScreenTitleLabel;
+	private JLabel userNumLabel;
+	public ServerThread serverThread;
 
 	/**
 	 * Launch the application.
 	*/
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					ConfigServerScreen frame = new ConfigServerScreen();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+	
+	public void updateUserNum(Integer userNum)
+	{
+	   userNumLabel.setText(userNum + "");	
 	}
 
 	public void drawSeatMap(MovieTheater movieTheater)
@@ -84,7 +93,16 @@ public class ConfigServerScreen extends JFrame {
 	        for (int row = 0; row < ROWS; row++) {
 	            for (int col = 0; col < COLUMNS; col++) {
 	                JButton seatButton = new JButton();
-	                seatButton.setBackground(Color.GREEN);
+	                System.out.println(zone.getSeats().get(row).size());
+	                Seat seat = zone.getSeats().get(row).get(col);
+	                if(seat.isStatus())
+	                {
+	                   seatButton.setBackground(Color.GRAY);
+	                }
+	                else
+	                {
+	                	seatButton.setBackground(Color.GREEN);
+	                }
 	                seatButton.setOpaque(true);
 	                seatButton.setBorderPainted(false);
 	                seatButton.setText(zone.getName() + "-" + row + "-" + col);
@@ -97,6 +115,8 @@ public class ConfigServerScreen extends JFrame {
         stageMapPanel.revalidate();
         stageMapPanel.repaint();
 	}
+
+	
 	
 	public void updateMovieTimeCombobox(String timeZoneValue)
 	{
@@ -126,7 +146,9 @@ public class ConfigServerScreen extends JFrame {
 		if(timeZoneValue != null)
 		{
 			List<LocalTime> timeZoneComponents = TimeZoneUtitls.getTimeZoneFromString(timeZoneValue);
-			//
+			// Set text for text field
+			setTextField(timeZoneComponents.get(0).format(formatter), timeZoneComponents.get(1).format(formatter));
+			
 			if(timeZoneComponents.get(0) != null && timeZoneComponents.get(1) != null)
 			{
 				MovieTime movieTime = movieTimeService.getMovieTimeFromTimeZone(timeZoneComponents.get(0),timeZoneComponents.get(1));
@@ -135,13 +157,29 @@ public class ConfigServerScreen extends JFrame {
 					drawSeatMap(movieTime.getMovieTheater());
 				}
 			}   	
-		}			
+		}
+		else
+		{
+			drawSeatMap(new MovieTheater());
+		}
 	}
 	
 	public void initData()
 	{
 		updateMovieTimeCombobox(null);	
 		updateSeatMap();
+	}
+	
+	public void updateView(List<MovieTime> movieTimes)
+	{	
+		String timeZoneValue = (String) movieTimeCombobox.getSelectedItem();
+		List<String> timeZoneAsString = TimeZoneUtitls.getListTimeZoneAsString(movieTimes);
+		if(!timeZoneAsString.contains(timeZoneValue))
+		{
+			timeZoneValue = null;
+		}
+	    updateMovieTimeCombobox(timeZoneValue);
+	    updateSeatMap();
 	}
 	
 	public void comboboxSelectionChange()
@@ -151,19 +189,34 @@ public class ConfigServerScreen extends JFrame {
 	
 	public void addMovieScreenToPanel()
 	{
-		lblNewLabel = new JLabel("Màn hình chiếu phim");
-		lblNewLabel.setForeground(new Color(255, 255, 255));
-		lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		movieScreenTitleLabel = new JLabel("Màn hình chiếu phim");
+		movieScreenTitleLabel.setForeground(new Color(255, 255, 255));
+		movieScreenTitleLabel.setFont(new Font("Tahoma", Font.PLAIN, 20));
 		movieScreenPanel.removeAll();
-		movieScreenPanel.add(lblNewLabel);
+		movieScreenPanel.add(movieScreenTitleLabel);
 		stageMapPanel.add(movieScreenPanel, BorderLayout.SOUTH);
 	}
 	
-	public ConfigServerScreen()
+	public void resetTextField()
 	{
+		this.timeStartText.setText("");
+		this.timeEndText.setText("");
+	}
+	
+	public void setTextField(String fromTime, String toTime)
+	{
+		this.timeStartText.setText(fromTime);
+		this.timeEndText.setText(toTime);
+	}
+	
+	public ConfigServerScreen()
+	{	
+		// Create components for UI
 		setIconImage(Toolkit.getDefaultToolkit().getImage(ConfigServerScreen.class.getResource("/assets/serverIcon.png")));
+		setResizable(false);
 		getContentPane().setBackground(new Color(236, 200, 123));
 		getContentPane().setLayout(null);
+		serverThread = new ServerThread(this);
 		ConfigServerScreenController ac = new ConfigServerScreenController(this);
 		movieTimeService = new MovieTimeService();
 		
@@ -210,9 +263,9 @@ public class ConfigServerScreen extends JFrame {
 		stageConfigButton.addActionListener(ac);
 		getContentPane().add(stageConfigButton);
 		
-		userAccessNumLabel = new JLabel("Số lượng người đang truy cập");
+		userAccessNumLabel = new JLabel("Số lượng người đang truy cập:");
 		userAccessNumLabel.setFont(new Font("Tahoma", Font.PLAIN, 20));
-		userAccessNumLabel.setBounds(581, 141, 287, 43);
+		userAccessNumLabel.setBounds(581, 141, 272, 43);
 		getContentPane().add(userAccessNumLabel);
 		
 		movieTimeConfigLabel = new JLabel("Cấu hình suất chiếu");
@@ -230,9 +283,7 @@ public class ConfigServerScreen extends JFrame {
 		timeEndLabel.setFont(new Font("Tahoma", Font.PLAIN, 20));
 		timeEndLabel.setBounds(581, 285, 141, 43);
 		getContentPane().add(timeEndLabel);
-		
-		
-		
+	
 		createTimeBtn = new JButton("Thêm");
 		createTimeBtn.setFont(new Font("Tahoma", Font.PLAIN, 20));
 		createTimeBtn.setBounds(613, 354, 85, 35);
@@ -256,10 +307,23 @@ public class ConfigServerScreen extends JFrame {
 		timeEndText.setColumns(10);
 		timeEndText.setBounds(697, 291, 150, 34);
 		getContentPane().add(timeEndText);
+		
+		userNumLabel = new JLabel("0");
+		userNumLabel.setForeground(new Color(255, 0, 0));
+		userNumLabel.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		userNumLabel.setBounds(856, 141, 31, 43);
+		getContentPane().add(userNumLabel);
 		this.setSize(901, 600);
 		setBackground(new Color(236, 200, 123));
+		
+		
 		setLocationRelativeTo(null);
 	    setDefaultCloseOperation(EXIT_ON_CLOSE);
+	    setVisible(true);
+	   
+	    // Init data for combobox and seat map
 	    initData();
+	    /// Execute server
+	    serverThread.start();  
 	}
 }

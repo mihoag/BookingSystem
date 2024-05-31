@@ -5,33 +5,35 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import Utils.SeatUtils;
 import Utils.TimeZoneUtitls;
 import models.MovieTheater;
 import models.MovieTime;
+import models.Seat;
+import models.User;
 import models.Zone;
 import repository.MovieTimeRepository;
 
 public class MovieTimeService {
 	
 	 private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-	
+	 private UserService userService = new UserService();
+	 
+	 public List<MovieTime> getMovieTimes()
+	 {
+		 try {
+			return MovieTimeRepository.getInstance().getMovieTimes();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return new ArrayList<>();
+	 }
+	 
      public List<String> getMovieTimeAsString() throws ClassNotFoundException
      {
     	 List<MovieTime> listMovieTimes = MovieTimeRepository.getInstance().getMovieTimes();
-    	 List<String> movieTimeAsString = new ArrayList<>();
-    	 
-
-         // Define a formatter with the desired pattern
-         
-         if(listMovieTimes != null)
-         {
-        	 for(MovieTime movieTime : listMovieTimes)
-        	 {
-        		//movieTime.getFromTime().format(formatter) + "-" + movieTime.getToTime().format(formatter)
-        		movieTimeAsString.add(TimeZoneUtitls.getTimeZoneValueAsString(movieTime.getFromTime().format(formatter), movieTime.getToTime().format(formatter)));
-        	 } 
-         }
-    	 return movieTimeAsString;
+    	 return TimeZoneUtitls.getListTimeZoneAsString(listMovieTimes);
      }
      
      public boolean  addMovieTime(String fromTime, String toTime) throws ClassNotFoundException
@@ -45,9 +47,15 @@ public class MovieTimeService {
     	 try {
 			LocalTime fromLocalTime = LocalTime.parse(fromTime, formatter);
 		    LocalTime toLocalTime = LocalTime.parse(toTime, formatter);
+		    
+		    if(fromLocalTime.isAfter(toLocalTime) || fromLocalTime.equals(toLocalTime))
+		    {
+		    	return false;
+		    }
+		    
 		    for(MovieTime movieTime : listMovieTimes)
 		    {
-		    	if(((movieTime.getFromTime().isAfter(fromLocalTime) || movieTime.getFromTime().equals(fromLocalTime) )&& movieTime.getFromTime().isBefore(toLocalTime)) || ((movieTime.getToTime().isAfter(fromLocalTime) || (movieTime.getToTime().equals(fromLocalTime) ) && movieTime.getToTime().isBefore(toLocalTime))))
+		    	if(((movieTime.getFromTime().isAfter(fromLocalTime) || movieTime.getFromTime().equals(fromLocalTime) )&& movieTime.getFromTime().isBefore(toLocalTime)) || (movieTime.getToTime().isAfter(fromLocalTime)  && (movieTime.getToTime().isBefore(toLocalTime) || movieTime.getToTime().equals(toLocalTime))))
 		    	{
 		    		return false;
 		    	}
@@ -87,7 +95,25 @@ public class MovieTimeService {
     	return null;
      }
      
-    
+     public boolean deleteMovieTime(String fromTime, String toTime)
+     {
+    	 try {
+    		MovieTime movieTime = new MovieTime(LocalTime.parse(fromTime, formatter), LocalTime.parse(toTime, formatter));
+    		List<MovieTime> movieTimes = MovieTimeRepository.getInstance().getMovieTimes();
+	        if(movieTimes.contains(movieTime))
+	        {
+	        	movieTimes.remove(movieTime);
+	        	MovieTimeRepository.getInstance().writeMovieTimeData(movieTimes);
+	        	return true;
+	        }
+		 } catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			return false;
+		}
+    	return false;
+    }
+     
      public boolean addZone(String name, Integer rowNum, Integer seatPerRow, Double price)
      {
     	 try {
@@ -101,8 +127,7 @@ public class MovieTimeService {
 	    	    {
 	    	    	break;
 	    	    }
-	    	 }
-	    	 
+	    	 }   	 
 	    	 MovieTimeRepository.getInstance().writeMovieTimeData(movieTimes);
 	    	 return check;
 		} catch (ClassNotFoundException e) {
@@ -114,10 +139,10 @@ public class MovieTimeService {
      
      public List<Zone> getListZones()
      {
-    	 List<MovieTime> movieTimes;
+    	List<MovieTime> movieTimes;
 		try {
 			movieTimes = MovieTimeRepository.getInstance().getMovieTimes();
-		    if(movieTimes == null)
+		    if(movieTimes == null || movieTimes.size() == 0)
 		    {
 		    	return new ArrayList<>();
 		    }
@@ -172,6 +197,58 @@ public class MovieTimeService {
 			e.printStackTrace();
 		}
     	return listZone;
+     }
+     
+     
+     public void writeAllMovieTimesToFile(List<MovieTime> movieTimes)
+     {
+    	 MovieTimeRepository.getInstance().writeMovieTimeData(movieTimes);
+     }
+     
+     public synchronized void bookMovieSeat(String bookingInfo)
+     {
+    	 List<Object> bookingInfoComponents = TimeZoneUtitls.getBookingInfoFromString(bookingInfo);
+    	 String username = (String) bookingInfoComponents.get(0);
+    	 MovieTime movieTime = getMovieTimeFromTimeZone((LocalTime)bookingInfoComponents.get(1),(LocalTime)bookingInfoComponents.get(2));
+    	 String zoneName = (String) bookingInfoComponents.get(3);
+    	 Integer row = (Integer) bookingInfoComponents.get(4);
+    	 Integer col = (Integer) bookingInfoComponents.get(4);
+    	 if(movieTime != null)
+    	 {
+    		 List<Zone> listZones = movieTime.getMovieTheater().getListZone();
+    		 for(Zone zone : listZones)
+    		 {
+    			 if(zone.getName().equals(zoneName))
+    			 {
+    				 User user = userService.getUserByUsername(username);
+    				 Seat seat = zone.getSeats().get(row).get(col);
+    				 if(!seat.isStatus())
+    				 {
+    					System.out.println("ok");
+    					seat.setStatus(true);
+    					seat.setUser(user);
+    				 }
+    				 break;
+    			 }
+    		 }
+    		 updateSeat(movieTime);
+    	 }
+     }
+     
+     public synchronized void updateSeat(MovieTime movieTime)
+     {
+    	 try {
+			List<MovieTime> movieTimes = MovieTimeRepository.getInstance().getMovieTimes();
+			if(movieTimes.contains(movieTime))
+			{
+				int index = movieTimes.indexOf(movieTime);
+				movieTimes.set(index, movieTime);
+			}
+			MovieTimeRepository.getInstance().writeMovieTimeData(movieTimes);
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
      }
      
      public static void main(String[] args) throws ClassNotFoundException {

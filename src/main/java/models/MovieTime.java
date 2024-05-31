@@ -2,6 +2,7 @@ package models;
 
 import java.io.Serializable;
 import java.time.LocalTime;
+import java.util.Objects;
 
 public class MovieTime implements Serializable{
 	
@@ -47,4 +48,25 @@ public class MovieTime implements Serializable{
 	public void setMovieTheater(MovieTheater movieTheater) {
 		this.movieTheater = movieTheater;
 	}
+
+
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(fromTime, toTime);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MovieTime other = (MovieTime) obj;
+		return Objects.equals(fromTime, other.fromTime) && Objects.equals(toTime, other.toTime);
+	}
+	
+	
 }

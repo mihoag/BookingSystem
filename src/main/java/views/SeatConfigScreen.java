@@ -43,14 +43,7 @@ public class SeatConfigScreen extends JFrame {
     private ConfigServerScreen configScreen;
     private MovieTimeService service;
 	
-	/**
-	 * Launch the application.
-	 */
 	
-
-	/**
-	 * Create the frame.
-	 */
     public void initData()
     {
       updateZoneTable();
@@ -60,9 +53,10 @@ public class SeatConfigScreen extends JFrame {
     {
     	 zoneInfoTableModel.setRowCount(0);
     	 List<Zone> listZone = service.getListZones();
+    	 
          for(Zone zone : listZone)
          {
-      	 zoneInfoTableModel.addRow(new Object[] {zone.getName(), zone.getRowNum(), zone.getSeatsPerRow(), zone.getPrice()});  
+      	   zoneInfoTableModel.addRow(new Object[] {zone.getName(), zone.getRowNum(), zone.getSeatsPerRow(), zone.getPrice()});  
          }
     }
     
@@ -128,7 +122,7 @@ public class SeatConfigScreen extends JFrame {
 	public SeatConfigScreen(ConfigServerScreen configScreen) {
 		this.configScreen = configScreen;
 		service = new MovieTimeService();
-		
+		setResizable(false);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(SeatConfigScreen.class.getResource("/assets/serverIcon.png")));
 		setBounds(100, 100, 816, 525);
 		contentPane = new JPanel();
