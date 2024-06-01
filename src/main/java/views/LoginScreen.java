@@ -21,9 +21,6 @@ import javax.swing.JButton;
 
 public class LoginScreen extends JFrame {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	public JTextField usernameTextField;
@@ -34,13 +31,7 @@ public class LoginScreen extends JFrame {
 	public JButton loginBtn;
 	public JButton registerBtn;
 	
-	/**
-	 * Launch the application.
-	*/
 	
-	/**
-	 * Create the frame.
-	 */
 	public LoginScreen() {
 		setIconImage(Toolkit.getDefaultToolkit().getImage(LoginScreen.class.getResource("/assets/serverIcon.png")));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

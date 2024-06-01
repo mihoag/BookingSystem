@@ -38,12 +38,18 @@ public class UserThread extends Thread {
 			reader = new ObjectInputStream(socket.getInputStream());
 			do {
 			   String bookingInfo = (String) reader.readObject();
+			   if(bookingInfo.equals("disconnected"))
+			   {
+				   break;
+			   }
 			   service.bookMovieSeat(bookingInfo);
 			   List<MovieTime> listUpdateMovieTime = service.getMovieTimes();
 			   server.broadcast(listUpdateMovieTime);
 			   server.updateView(listUpdateMovieTime);
 			} while (true);
-			
+			socket.close();
+			server.removeUser(this);
+			server.updateUserNum();
 		} catch (IOException ex) {
 			System.out.println("Error in UserThread: " + ex.getMessage());
 			ex.printStackTrace();
@@ -63,4 +69,12 @@ public class UserThread extends Thread {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * 
+	 */
+	
+	
+	
+	
 }

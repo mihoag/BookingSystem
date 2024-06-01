@@ -6,7 +6,8 @@ import java.util.List;
 
 import javax.swing.JButton;
 
-import Utils.SeatUtils;
+import threads.UserWriteThread;
+import utils.SeatUtils;
 import views.BookingUserScreen;
 
 public class BookingUserScreenController implements ActionListener{
@@ -29,8 +30,7 @@ public class BookingUserScreenController implements ActionListener{
 			
 			String bookingInfo = username + "|" + zoneTime + "|" + seatId;
 			
-			view.clientThread.userWriteThread.bookingInfo(bookingInfo);
-			view.clientThread.userWriteThread.start();
+			view.clientThread.userWriteThread.sendBookingDataToServer(bookingInfo);
 		}
 	}
 

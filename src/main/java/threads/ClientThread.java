@@ -14,8 +14,9 @@ public class ClientThread extends Thread {
    private BookingUserScreen view;
    private final String hostname = "localhost";
    private final Integer port = 3000;
-   private UserReadThread userReadThread;
+   public UserReadThread userReadThread;
    public UserWriteThread userWriteThread;
+   public Socket socket;
    
    public ClientThread(BookingUserScreen view)
    {
@@ -26,12 +27,14 @@ public class ClientThread extends Thread {
 	public void run() {
 	   // TODO Auto-generated method stub
 	   try {
-			Socket socket = new Socket(hostname, port);
+			socket = new Socket(hostname, port);
 			System.out.println("Connected to the chat server");
 			
 			userReadThread = new UserReadThread(socket, this);
 			userReadThread.start();
-			userWriteThread = new UserWriteThread(socket, this);
+			
+			userWriteThread = new UserWriteThread(socket);
+			userWriteThread.start();
 		} catch (UnknownHostException ex) {
 			System.out.println("Server not found: " + ex.getMessage());
 		} catch (IOException ex) {

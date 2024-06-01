@@ -5,14 +5,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-import Utils.SeatUtils;
-import Utils.TimeZoneUtitls;
 import models.MovieTheater;
 import models.MovieTime;
 import models.Seat;
 import models.User;
 import models.Zone;
 import repository.MovieTimeRepository;
+import utils.SeatUtils;
+import utils.TimeZoneUtitls;
 
 public class MovieTimeService {
 	
@@ -212,7 +212,7 @@ public class MovieTimeService {
     	 MovieTime movieTime = getMovieTimeFromTimeZone((LocalTime)bookingInfoComponents.get(1),(LocalTime)bookingInfoComponents.get(2));
     	 String zoneName = (String) bookingInfoComponents.get(3);
     	 Integer row = (Integer) bookingInfoComponents.get(4);
-    	 Integer col = (Integer) bookingInfoComponents.get(4);
+    	 Integer col = (Integer) bookingInfoComponents.get(5);
     	 if(movieTime != null)
     	 {
     		 List<Zone> listZones = movieTime.getMovieTheater().getListZone();
@@ -222,9 +222,9 @@ public class MovieTimeService {
     			 {
     				 User user = userService.getUserByUsername(username);
     				 Seat seat = zone.getSeats().get(row).get(col);
+    				 System.out.println(seat.isStatus());
     				 if(!seat.isStatus())
     				 {
-    					System.out.println("ok");
     					seat.setStatus(true);
     					seat.setUser(user);
     				 }

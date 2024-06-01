@@ -37,7 +37,6 @@ public class UserReadThread extends Thread {
 	        	response = (List<MovieTime>) reader.readObject();
 	            client.updateData(response);
 	        }
-			//client.test(response);
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -46,10 +45,6 @@ public class UserReadThread extends Thread {
 			e.printStackTrace();
 		}
 		       
-		while (true) {
-			
-		}
-	}
-	
-	
+
+	}	
 }

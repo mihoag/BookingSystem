@@ -7,16 +7,15 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.List;
 
 public class UserWriteThread extends Thread {
-	private ObjectOutputStream writer;
+	private  ObjectOutputStream writer = null;
 	private Socket socket;
-	private ClientThread client;
-	private String bookingInfo;
 
-	public UserWriteThread(Socket socket, ClientThread client) {
+	public UserWriteThread(Socket socket) {
 		this.socket = socket;
-		this.client = client;
+		
 		try {
 			writer = new ObjectOutputStream(socket.getOutputStream());
 		} catch (IOException ex) {
@@ -25,17 +24,24 @@ public class UserWriteThread extends Thread {
 		}
 	}
 	
-	public void bookingInfo(String info)
-	{
-		this.bookingInfo = info;
-	}
-
 	public void run() {
-	    try {
+		while(true)
+		{
+		}
+	}
+	
+	public void sendBookingDataToServer(String bookingInfo)
+	{
+		try {
 			writer.writeObject(bookingInfo);
+			if(bookingInfo.equals("disconnected"))
+			{
+				socket.close();
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} 
+		}
 	}
+
 }

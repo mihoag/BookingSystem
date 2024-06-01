@@ -56,6 +56,11 @@ public class ServerThread extends Thread {
    	
    	public void updateView(List<MovieTime> movieTimes)
    	{
-   	   
+   	   view.updateView(movieTimes);
+   	}
+   	
+   	public void removeUser(UserThread userThread)
+   	{
+   		userThreads.remove(userThread);
    	}
 }

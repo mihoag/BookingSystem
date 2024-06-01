@@ -8,6 +8,7 @@ import javax.swing.JOptionPane;
 import models.User;
 import repository.UserRepository;
 import service.UserService;
+import utils.HashUtils;
 import views.BookingUserScreen;
 import views.LoginScreen;
 import views.RegisterScreen;
@@ -40,7 +41,7 @@ public class LoginScreenController implements ActionListener{
 		   User user = userService.getUserByUsername(username);
 		   if(user != null)
 		   {
-			   if(user.getPassword().equals(password))
+			   if(HashUtils.compareHashes(user.getPassword(), HashUtils.hashString(password)))
 			   {
 				   check = true;
 			   }

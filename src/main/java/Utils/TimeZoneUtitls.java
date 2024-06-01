@@ -1,4 +1,4 @@
-package Utils;
+package utils;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -19,8 +19,6 @@ public class TimeZoneUtitls {
 		return components;
 	}
 	
-	
-	
 	public static boolean checkTimeFormat(String time)
 	{
         try {
@@ -31,8 +29,7 @@ public class TimeZoneUtitls {
 			return false;
 		}      
 	}
-	
-	
+
     public static List<LocalTime> getTimeZoneFromString(String timeZone)
     {
     	
@@ -78,6 +75,7 @@ public class TimeZoneUtitls {
    	 return movieTimeAsString;
     }
     
+    
     public static String getTimeZoneValueAsString(String fromTime, String toTime)
     {
     	return fromTime + "-" + toTime;
@@ -102,10 +100,5 @@ public class TimeZoneUtitls {
         bookingInfo.add(seatIdComponents.get(2));
         
         return bookingInfo;
-    }
-    
-    public static void main(String[] args) {
-		getBookingInfoFromString("minhhoang|07:00:00-08:00:00|A-1-2");
-	}
-   
+    }  
 }

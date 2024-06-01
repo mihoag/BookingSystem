@@ -7,9 +7,9 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
-import Utils.TimeZoneUtitls;
 import models.MovieTime;
 import service.MovieTimeService;
+import utils.TimeZoneUtitls;
 import views.ConfigServerScreen;
 import views.SeatConfigScreen;
 

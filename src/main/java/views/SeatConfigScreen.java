@@ -213,17 +213,4 @@ public class SeatConfigScreen extends JFrame {
 		addMouseEventforJTable();
 		initData();
 	}
-	
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					SeatConfigScreen sc = new SeatConfigScreen(new ConfigServerScreen());
-					
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
 }

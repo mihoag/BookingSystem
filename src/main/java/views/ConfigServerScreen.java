@@ -7,18 +7,21 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 
-import Utils.TimeZoneUtitls;
 import controllers.ConfigServerScreenController;
 import models.MovieTheater;
 import models.MovieTime;
 import models.Seat;
+import models.User;
 import models.Zone;
 import service.MovieTimeService;
 import threads.ServerThread;
 import threads.UserThread;
+import utils.TimeZoneUtitls;
 
 import java.awt.Toolkit;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.BorderLayout;
@@ -93,15 +96,27 @@ public class ConfigServerScreen extends JFrame {
 	        for (int row = 0; row < ROWS; row++) {
 	            for (int col = 0; col < COLUMNS; col++) {
 	                JButton seatButton = new JButton();
-	                System.out.println(zone.getSeats().get(row).size());
 	                Seat seat = zone.getSeats().get(row).get(col);
 	                if(seat.isStatus())
 	                {
-	                   seatButton.setBackground(Color.GRAY);
+	                   seatButton.setBackground(Color.lightGray);
+	                   // add event when clicking ( show user's info booking movie)
+	                   User user = seat.getUser();
+	                   String title = "Thông tin đặt vé";
+	                   String zoneTime = (String) movieTimeCombobox.getSelectedItem();
+	                   StringBuilder strBuilder = new StringBuilder();
+	                   strBuilder.append("Suất chiếu: ").append(zoneTime).append("\n").append("Họ tên người đặt: ").append(user.getFullname()).append("\n").append("Số điện thoại: ").append(user.getTel());
+	                   seatButton.addActionListener(new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							// TODO Auto-generated method stub
+							JOptionPane.showMessageDialog(stageMapPanel,strBuilder.toString(), title, JOptionPane.INFORMATION_MESSAGE);
+						}
+					});
 	                }
 	                else
 	                {
-	                	seatButton.setBackground(Color.GREEN);
+	                   seatButton.setBackground(Color.GREEN);
 	                }
 	                seatButton.setOpaque(true);
 	                seatButton.setBorderPainted(false);

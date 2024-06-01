@@ -7,6 +7,7 @@ import javax.swing.JOptionPane;
 
 import models.User;
 import service.UserService;
+import utils.HashUtils;
 import views.LoginScreen;
 import views.RegisterScreen;
 
@@ -33,6 +34,13 @@ public class RegisterScreenController implements ActionListener{
 		   JOptionPane.showMessageDialog(view, "Tên đăng nhập không hợp lệ");
 		   return false;
 		}
+
+		if(username.contains("\\|"))
+		{
+		   JOptionPane.showMessageDialog(view, "Tên đăng nhập không được bao gồm kí tự |");
+		   return false;
+		}
+		
 		if(password == null || password.equals("") || password.contains(" "))
 		{
 		   JOptionPane.showMessageDialog(view, "Mật khẩu không hợp lệ");
@@ -55,13 +63,13 @@ public class RegisterScreenController implements ActionListener{
 	    {
 	    	String username = view.usernameTextField.getText();
 	    	String password = view.passwordTextField.getText();
-	    	String fullname = view.usernameTextField.getText();
+	    	String fullname = view.fullnameTextField.getText();
 	    	String tel = view.telTextField.getText();
 	    	
 	    	boolean check = checkValidData(username, password, fullname);
 	    	if(check)
 	    	{
-	    		User user = new User(username, password, fullname,tel);
+	    		User user = new User(username, HashUtils.hashString(password), tel,fullname);
 	    		Boolean checkRegister = service.addUser(user);
 	    		if(checkRegister)
 	    		{

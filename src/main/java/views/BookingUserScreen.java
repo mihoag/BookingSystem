@@ -12,7 +12,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import Utils.TimeZoneUtitls;
 import controllers.BookingUserScreenController;
 import models.MovieTheater;
 import models.MovieTime;
@@ -22,6 +21,7 @@ import models.Zone;
 import repository.MovieTimeRepository;
 import service.MovieTimeService;
 import threads.ClientThread;
+import utils.TimeZoneUtitls;
 
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -147,7 +147,14 @@ public class BookingUserScreen extends JFrame {
 	                Seat seat = zone.getSeats().get(row).get(col);
 	                if(seat.isStatus())
 	                {
-	                   seatButton.setBackground(Color.GRAY);
+	                   if(seat.getUser().getUsername().equals(user.getUsername()))
+	                   {
+	                	   seatButton.setBackground(Color.yellow);   
+	                   }
+	                   else
+	                   {
+	                	   seatButton.setBackground(Color.lightGray);   
+	                   }
 	                }
 	                else
 	                {
@@ -237,6 +244,8 @@ public class BookingUserScreen extends JFrame {
 			            JOptionPane.QUESTION_MESSAGE);
 			        
 			        if (response == JOptionPane.YES_OPTION) {
+			        	
+			        	clientThread.userWriteThread.sendBookingDataToServer("disconnected");
 			            dispose();
 			            // Optionally, exit the application
 			            System.exit(0);
