@@ -6,7 +6,7 @@ import java.util.List;
 
 import javax.swing.JButton;
 
-import threads.UserWriteThread;
+import threads.ClientWriteThread;
 import utils.SeatUtils;
 import views.BookingUserScreen;
 

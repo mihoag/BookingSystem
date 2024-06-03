@@ -70,7 +70,6 @@ public class BookingUserScreen extends JFrame {
     	 return null;
     }
     
-    
 	public void updateMovieTimeCombobox(String timeZoneValue)
 	{
 		List<String> timeZoneAsString = TimeZoneUtitls.getListTimeZoneAsString(movieTimes);
@@ -264,6 +263,12 @@ public class BookingUserScreen extends JFrame {
 				
 			}
 		});
+	
+	}
+	
+	public void showInfoDisconnect()
+	{
+		JOptionPane.showMessageDialog(contentPane, "Server đã tắt", "Thông báo đóng kết nối", JOptionPane.INFORMATION_MESSAGE);
 	}
 	
 	public BookingUserScreen(User user) {

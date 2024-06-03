@@ -9,11 +9,11 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.List;
 
-public class UserWriteThread extends Thread {
+public class ClientWriteThread extends Thread {
 	private  ObjectOutputStream writer = null;
 	private Socket socket;
 
-	public UserWriteThread(Socket socket) {
+	public ClientWriteThread(Socket socket) {
 		this.socket = socket;
 		
 		try {

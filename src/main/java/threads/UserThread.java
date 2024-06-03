@@ -47,6 +47,7 @@ public class UserThread extends Thread {
 			   server.broadcast(listUpdateMovieTime);
 			   server.updateView(listUpdateMovieTime);
 			} while (true);
+			
 			socket.close();
 			server.removeUser(this);
 			server.updateUserNum();
@@ -58,9 +59,11 @@ public class UserThread extends Thread {
 			e.printStackTrace();
 		}
 	}
+	
 	/**
-	 * Sends a object to the client.
-	 */
+	  * Sends a object to the client.
+	*/
+	
 	void sendUpdatedData(List<MovieTime> data) {
 		try {
 			writer.writeObject(data);
@@ -69,12 +72,15 @@ public class UserThread extends Thread {
 			e.printStackTrace();
 		}
 	}
-	
-	/**
-	 * 
-	 */
-	
-	
-	
+
+	public void sendMessage(String message)
+	{
+		try {
+			writer.writeObject(message);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+	}
 	
 }

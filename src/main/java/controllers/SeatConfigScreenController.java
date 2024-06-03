@@ -30,14 +30,53 @@ public class SeatConfigScreenController implements ActionListener{
     	this.serverView.serverThread.broadcast(movieTimes);
     }
 	
-	
+    public boolean isNumeric(String str) {
+        if (str == null || str.isEmpty()) {
+            return false;
+        }
+        try {
+            Integer.parseInt(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+    
+	public boolean checkInputData(String name, String rowNum, String seatPerRow, String price)
+	{
+		if(name == null || name.equals(""))
+		{
+			JOptionPane.showMessageDialog(view, "Tên khu không hợp lệ");
+			return false;
+		}
+		
+		if(rowNum == null || !isNumeric(rowNum))
+		{
+			JOptionPane.showMessageDialog(view, "Dữ liệu số hàng không hợp lệ");
+			return false;
+		}
+		
+		if(seatPerRow == null || !isNumeric(seatPerRow))
+		{
+			JOptionPane.showMessageDialog(view, "Dữ liệu số chỗ ngồi không hợp lệ");
+			return false;
+		}
+		
+		if(price == null || !isNumeric(price))
+		{
+			JOptionPane.showMessageDialog(view, "Dữ liệu giá tiền không hợp lệ");
+			return false;
+		}
+		
+		return true;
+	}
+    
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
 	     if(e.getSource() == view.addBtn)
 	     {
 	    	 try {
-	    		 
 	    		// Check if exist movie time
 	    		List<MovieTime> lsMovieTime = service.getMovieTimes();
 	    		if(lsMovieTime.size() == 0)
@@ -46,11 +85,16 @@ public class SeatConfigScreenController implements ActionListener{
 	    			return;
 	    		}
 	    		 
+	    		if(!checkInputData(view.zoneNameTextField.getText(),view.rowNumTextField.getText(),view.seatNumPerRowText.getText(),view.priceTextField.getText()))
+	    		{
+	    			return;
+	    		}
+	    		
 	    		String name = view.zoneNameTextField.getText();
 	 	        Integer rowNum = Integer.parseInt(view.rowNumTextField.getText());  
 	 	        Integer seatNumPerRow = Integer.parseInt(view.seatNumPerRowText.getText());
 	 	        Double price = Double.parseDouble(view.priceTextField.getText());
-	 	        
+	 	         	        
 	 	        /// 
 	 	        boolean check = service.addZone(name, rowNum, seatNumPerRow, price);
 	 	        if(check)

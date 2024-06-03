@@ -63,4 +63,11 @@ public class ServerThread extends Thread {
    	{
    		userThreads.remove(userThread);
    	}
+   	
+   	public void sendMessageToClients(String message)
+   	{
+   		for (UserThread aUser : userThreads) {
+   			aUser.sendMessage(message);
+   		}
+   	}
 }

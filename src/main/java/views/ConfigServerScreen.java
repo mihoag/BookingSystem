@@ -31,6 +31,8 @@ import javax.swing.JTextField;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -130,8 +132,6 @@ public class ConfigServerScreen extends JFrame {
         stageMapPanel.revalidate();
         stageMapPanel.repaint();
 	}
-
-	
 	
 	public void updateMovieTimeCombobox(String timeZoneValue)
 	{
@@ -224,6 +224,74 @@ public class ConfigServerScreen extends JFrame {
 		this.timeEndText.setText(toTime);
 	}
 	
+	public void addEventForComponent()
+	{ 
+        movieTimeCombobox.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				comboboxSelectionChange();
+			}
+		});
+
+		this.addWindowListener(new WindowListener() {
+			
+			@Override
+			public void windowOpened(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void windowIconified(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void windowDeiconified(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void windowDeactivated(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void windowClosing(WindowEvent e) {
+				// TODO Auto-generated method stub
+				int response = JOptionPane.showConfirmDialog(stageMapPanel, 
+			            "Bạn có muốn thoát khỏi ứng dụng?", 
+			            "Xác nhận thoát", 
+			            JOptionPane.YES_NO_OPTION, 
+			            JOptionPane.QUESTION_MESSAGE);
+			        
+			        if (response == JOptionPane.YES_OPTION) {
+			            serverThread.sendMessageToClients("disconnect");
+			            dispose();
+			            // Optionally, exit the application
+			            System.exit(0);
+			        }
+			}
+			
+			@Override
+			public void windowClosed(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void windowActivated(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+	}
+	
 	public ConfigServerScreen()
 	{	
 		// Create components for UI
@@ -261,15 +329,6 @@ public class ConfigServerScreen extends JFrame {
 		movieTimeCombobox = new JComboBox(modelCombobox);
 		movieTimeCombobox.setFont(new Font("Tahoma", Font.PLAIN, 20));
 		movieTimeCombobox.setBounds(125, 92, 218, 33);
-		movieTimeCombobox.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				comboboxSelectionChange();
-			}
-		});
-		
 		getContentPane().add(movieTimeCombobox);
 		
 		stageConfigButton = new JButton("Cấu hình sân khấu");
@@ -336,6 +395,9 @@ public class ConfigServerScreen extends JFrame {
 	    setDefaultCloseOperation(EXIT_ON_CLOSE);
 	    setVisible(true);
 	   
+	    // Add event for components
+	    addEventForComponent();
+	    
 	    // Init data for combobox and seat map
 	    initData();
 	    /// Execute server

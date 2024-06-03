@@ -14,8 +14,8 @@ public class ClientThread extends Thread {
    private BookingUserScreen view;
    private final String hostname = "localhost";
    private final Integer port = 3000;
-   public UserReadThread userReadThread;
-   public UserWriteThread userWriteThread;
+   public ClientReadThread userReadThread;
+   public ClientWriteThread userWriteThread;
    public Socket socket;
    
    public ClientThread(BookingUserScreen view)
@@ -30,10 +30,10 @@ public class ClientThread extends Thread {
 			socket = new Socket(hostname, port);
 			System.out.println("Connected to the chat server");
 			
-			userReadThread = new UserReadThread(socket, this);
+			userReadThread = new ClientReadThread(socket, this);
 			userReadThread.start();
 			
-			userWriteThread = new UserWriteThread(socket);
+			userWriteThread = new ClientWriteThread(socket);
 			userWriteThread.start();
 		} catch (UnknownHostException ex) {
 			System.out.println("Server not found: " + ex.getMessage());
@@ -53,10 +53,9 @@ public class ClientThread extends Thread {
         view.updateData(movieTimes);
     }
     
-    public void test(List<MovieTime> rs)
+    public void showDisconnectedMessage()
     {
-    	JOptionPane.showConfirmDialog(view,rs);
+    	view.showInfoDisconnect();
     }
-   
-   
+    
 }

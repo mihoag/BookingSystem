@@ -10,12 +10,12 @@ import java.util.List;
 
 import models.MovieTime;
 
-public class UserReadThread extends Thread {
+public class ClientReadThread extends Thread {
 	private ObjectInputStream reader;
 	private Socket socket;
 	private ClientThread client;
 
-	public UserReadThread(Socket socket, ClientThread client) {
+	public ClientReadThread(Socket socket, ClientThread client) {
 		this.socket = socket;
 		this.client = client;
 
@@ -28,23 +28,31 @@ public class UserReadThread extends Thread {
 	}
 
 	public void run() {
-		List<MovieTime> response;
+	    Object response;
 		try {
-			response = (List<MovieTime>) reader.readObject();
-	        client.initData(response);   
+			response =  reader.readObject();
+			if(response instanceof List<?>)
+			{
+				 client.initData((List<MovieTime>)response);   	
+			}
 	        while(true)
 	        {
-	        	response = (List<MovieTime>) reader.readObject();
-	            client.updateData(response);
+	        	response = reader.readObject();
+	        	if(response instanceof List<?>)
+	        	{
+	        	   client.updateData((List<MovieTime>)response);
+	        	}
+	        	else if(response instanceof String)
+	        	{
+	        		if(response.equals("disconnect"))
+	        		{
+	        			client.showDisconnectedMessage();
+	        			break;
+	        		}
+	        	}
 	        }
-		} catch (ClassNotFoundException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		       
-
-	}	
+		} 	
+		}	
 }
