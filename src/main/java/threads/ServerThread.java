@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import models.Movie;
 import models.MovieTime;
 import views.ConfigServerScreen;
 
@@ -47,16 +48,16 @@ public class ServerThread extends Thread {
 		}
 	}
    
-   	public void broadcast(List<MovieTime> movieTimes)
+   	public void broadcast(List<Movie> movies)
    	{
    		for (UserThread aUser : userThreads) {
-   			aUser.sendUpdatedData(movieTimes);
+   			aUser.sendUpdatedData(movies);
    		}
    	}
    	
-   	public void updateView(List<MovieTime> movieTimes)
+   	public void updateView(List<Movie> movies)
    	{
-   	   view.updateView(movieTimes);
+   	   view.updateView(movies);
    	}
    	
    	public void removeUser(UserThread userThread)

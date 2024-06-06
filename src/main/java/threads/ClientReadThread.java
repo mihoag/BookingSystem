@@ -8,6 +8,7 @@ import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.util.List;
 
+import models.Movie;
 import models.MovieTime;
 
 public class ClientReadThread extends Thread {
@@ -31,16 +32,17 @@ public class ClientReadThread extends Thread {
 	    Object response;
 		try {
 			response =  reader.readObject();
+			
 			if(response instanceof List<?>)
 			{
-				 client.initData((List<MovieTime>)response);   	
+				client.initData((List<Movie>)response);   	
 			}
 	        while(true)
 	        {
 	        	response = reader.readObject();
 	        	if(response instanceof List<?>)
 	        	{
-	        	   client.updateData((List<MovieTime>)response);
+	        	   client.updateData((List<Movie>)response);
 	        	}
 	        	else if(response instanceof String)
 	        	{

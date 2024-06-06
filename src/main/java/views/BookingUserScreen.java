@@ -13,14 +13,17 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import controllers.BookingUserScreenController;
+import models.Movie;
 import models.MovieTheater;
 import models.MovieTime;
 import models.Seat;
 import models.User;
 import models.Zone;
 import repository.MovieTimeRepository;
+import service.MovieService;
 import service.MovieTimeService;
 import threads.ClientThread;
+import utils.MovieUtils;
 import utils.TimeZoneUtitls;
 
 import java.awt.Toolkit;
@@ -39,50 +42,73 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Image;
 import javax.swing.JTextField;
+import javax.swing.ComboBoxModel;
 
 public class BookingUserScreen extends JFrame {
 
 	private JPanel contentPane;
-	private JPanel imagePanel;
-    private DefaultComboBoxModel<String> modelCombobox;
+    private DefaultComboBoxModel<String> movieTimeModelCombobox;
     public JComboBox<String> movieTimeCombobox;
 	private JLabel movieTimeLabel;
 	private JLabel nameLabel;
 	private JLabel headerLabel;
     private JPanel movieStagePanel;
-    private JLabel lblImage;
     private JPanel movieScreenPanel;
-    private MovieTimeService movieTimeService;
     private JLabel movieScreenTitleLabel;
     public User user;
-    private List<MovieTime> movieTimes;
+    private List<Movie> movies;
     public ClientThread clientThread;
+    private JLabel movieNameLabel;
+    private DefaultComboBoxModel<String> movieNameModelCombobox;
+    private JComboBox<String> movieNameCombobox;
+    private JLabel lblImage;
+    private JPanel imagePanel;
 	
-    public MovieTime getMovieTimeFromTimeZone(List<MovieTime> movieTimes,LocalTime fromTimeLocalTime, LocalTime endTimeLocalTime)
-    {
-    	 for(MovieTime movieTime : movieTimes)
-    	 {
-    	   if(movieTime.getFromTime().equals(fromTimeLocalTime) && movieTime.getToTime().equals(endTimeLocalTime))
-    	   {
-    		   return movieTime;
-    	   }
-    	 }
-    	 return null;
-    }
+   
+    public void updateMovieCombobox(String movieName)
+	{
+		movieNameModelCombobox.removeAllElements();	
+		for(Movie movie : movies)
+		{
+			movieNameModelCombobox.addElement(movie.getMovieName());
+		}
+		
+		if(movieName != null)
+		{
+			if(MovieUtils.checkExistMovieName(movies, movieName))
+			{
+				movieNameModelCombobox.setSelectedItem(movieName);
+			}
+		}
+		String timeZone = (String) movieTimeCombobox.getSelectedItem();
+		updateMovieTimeCombobox(timeZone);
+	}
     
 	public void updateMovieTimeCombobox(String timeZoneValue)
 	{
-		List<String> timeZoneAsString = TimeZoneUtitls.getListTimeZoneAsString(movieTimes);
-		modelCombobox.removeAllElements();
-		for(String str : timeZoneAsString)
+		String movieName = (String) movieNameModelCombobox.getSelectedItem();
+	    Movie movie = MovieUtils.getMovieFromName(movies, movieName);
+	    
+		movieTimeModelCombobox.removeAllElements();
+		
+		if(movie != null)
 		{
-		   modelCombobox.addElement(str);
+			List<MovieTime> listMovieTimes = movie.getMovieTimes();
+			List<String> movieTimesAsString = TimeZoneUtitls.getListTimeZoneAsString(listMovieTimes);
+			
+			for(String str :  movieTimesAsString)
+			{
+				movieTimeModelCombobox.addElement(str);
+			}
+			if(timeZoneValue != null)
+			{
+			    if(movieTimesAsString.contains(timeZoneValue))
+			    {
+			    	movieTimeModelCombobox.setSelectedItem(timeZoneValue);
+			    }	
+			}
 		}
-		if(timeZoneValue != null)
-		{
-			modelCombobox.setSelectedItem(timeZoneValue);
-			updateSeatMap();
-		}
+		updateSeatMap();		
 	}
 	
 	
@@ -90,13 +116,16 @@ public class BookingUserScreen extends JFrame {
 	{
 		// Update seat map
 		String timeZoneValue = (String)movieTimeCombobox.getSelectedItem();
-		if(timeZoneValue != null)
+		String movieName = (String) movieNameCombobox.getSelectedItem();
+		if(timeZoneValue != null && movieName != null)
 		{
 			List<LocalTime> timeZoneComponents = TimeZoneUtitls.getTimeZoneFromString(timeZoneValue);
 			//
 			if(timeZoneComponents.get(0) != null && timeZoneComponents.get(1) != null)
 			{
-				MovieTime movieTime = getMovieTimeFromTimeZone(movieTimes,timeZoneComponents.get(0),timeZoneComponents.get(1));
+				Movie movie = MovieUtils.getMovieFromName(movies, movieName);
+				List<MovieTime> movieTimes = movie.getMovieTimes();
+				MovieTime movieTime = MovieUtils.getMovieTimeFromTimeZone(movieTimes,timeZoneComponents.get(0),timeZoneComponents.get(1));
 				if(movieTime !=null)
 				{	
 					drawSeatMap(movieTime.getMovieTheater());
@@ -173,39 +202,39 @@ public class BookingUserScreen extends JFrame {
 		movieStagePanel.repaint();
 	}
 	
-	public void initData(List<MovieTime> listMovieTimes)
+	public void initData(List<Movie> movies)
 	{
-		movieTimes = listMovieTimes;
-		updateMovieTimeCombobox(null);
-		updateSeatMap();	
+		System.out.println(movies.size());
+		this.movies = movies;
+		updateMovieCombobox(null);
 	}
 	
-	public void updateData(List<MovieTime> listMovieTimmes)
+	public void updateData(List<Movie> movies)
 	{
-		movieTimes = listMovieTimmes;
-		String timeZoneValue = (String) movieTimeCombobox.getSelectedItem();
-		List<String> timeZoneAsString = TimeZoneUtitls.getListTimeZoneAsString(movieTimes);
-		if(!timeZoneAsString.contains(timeZoneValue))
-		{
-			timeZoneValue = null;
-		}
-	    updateMovieTimeCombobox(timeZoneValue);
-	    updateSeatMap();
+		this.movies = movies;
+		String movieName = (String) movieNameCombobox.getSelectedItem();
+		updateMovieCombobox(movieName);
 	}
 
-	public BookingUserScreen()
-	{
-		
-	}
+	
 	
 	public void addEventForComponent()
 	{
 		movieTimeCombobox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				
+				updateSeatMap();
 			}
 		});
+		movieNameCombobox.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				updateMovieTimeCombobox(null);
+			}
+		});
+
 		
 		this.addWindowListener(new WindowListener() {
 			
@@ -274,11 +303,10 @@ public class BookingUserScreen extends JFrame {
 	public BookingUserScreen(User user) {
 		// Create components for UI
 		this.user = user;
-		this.movieTimeService = new MovieTimeService();
 		clientThread = new ClientThread(this);
 		setResizable(false);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(BookingUserScreen.class.getResource("/assets/serverIcon.png")));
-		setBounds(100, 100, 805, 594);
+		setBounds(100, 100, 805, 600);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setBackground(new Color(236, 200, 123));
@@ -288,11 +316,11 @@ public class BookingUserScreen extends JFrame {
 		
 		headerLabel = new JLabel("HỆ THỐNG ĐẶT VÉ XEM PHIM");
 		headerLabel.setFont(new Font("Tahoma", Font.BOLD, 30));
-		headerLabel.setBounds(171, 10, 449, 57);
+		headerLabel.setBounds(171, 0, 449, 57);
 		contentPane.add(headerLabel);
 		
 		movieStagePanel = new JPanel();
-		movieStagePanel.setBounds(10, 125, 768, 422);
+		movieStagePanel.setBounds(10, 131, 768, 422);
 		contentPane.add(movieStagePanel);
 		movieStagePanel.setLayout(new BorderLayout(0, 0));
 		
@@ -305,31 +333,51 @@ public class BookingUserScreen extends JFrame {
 		movieScreenTitleLabel.setFont(new Font("Tahoma", Font.PLAIN, 20));
 		movieScreenPanel.add(movieScreenTitleLabel);
 		
-		imagePanel = new JPanel();
-		imagePanel.setBackground(new Color(236, 200, 123));
-		imagePanel.setBounds(534, 77, 67, 67);
-		
 		ImageIcon img = new ImageIcon("src/main/java/assets/user.png");
         // Set the desired width and height
         int width = 30;  // Width in pixels
         int height = 30; // Height in pixels
         // Create a scaled version of the ImageIcon
+        
         Image scaledImage = img.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
         ImageIcon scaledIcon = new ImageIcon(scaledImage);
 	    lblImage = new JLabel();
 	    lblImage.setIcon(scaledIcon);
+	    imagePanel = new JPanel();
+	    imagePanel.setBackground(new Color(236, 200, 123));
+	    imagePanel.setLocation(11, 44);
+	    imagePanel.setSize(48, 48);
 	    imagePanel.add(lblImage, BorderLayout.CENTER);
 		contentPane.add(imagePanel);
 		
 		System.out.println(user.getFullname());
 		nameLabel = new JLabel(user.getFullname());
 		nameLabel.setFont(new Font("Tahoma", Font.PLAIN, 20));
-		nameLabel.setBounds(599, 79, 141, 31);
+		nameLabel.setBounds(69, 48, 141, 31);
 		contentPane.add(nameLabel);
 		
+		movieNameLabel = new JLabel("Tên phim");
+		movieNameLabel.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		movieNameLabel.setBounds(10, 85, 107, 38);
+		contentPane.add(movieNameLabel);
 		
-		modelCombobox = new DefaultComboBoxModel<String>();
-		movieTimeCombobox = new JComboBox(modelCombobox);
+	   
+		movieNameModelCombobox = new DefaultComboBoxModel<>();
+		movieNameCombobox = new JComboBox(movieNameModelCombobox);
+		movieNameCombobox.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		movieNameCombobox.setBounds(108, 88, 317, 33);
+		contentPane.add(movieNameCombobox);
+		
+		
+		movieTimeLabel = new JLabel("Suất chiếu");
+		movieTimeLabel.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		movieTimeLabel.setBounds(465, 83, 134, 38);
+		contentPane.add(movieTimeLabel);
+		
+		movieTimeModelCombobox = new DefaultComboBoxModel<String>();
+		movieTimeCombobox = new JComboBox(movieTimeModelCombobox);
+		movieTimeCombobox.setBounds(572, 88, 206, 33);
+		contentPane.add(movieTimeCombobox);
 		movieTimeCombobox.setFont(new Font("Tahoma", Font.PLAIN, 20));
 		movieTimeCombobox.addActionListener(new ActionListener() {
 			@Override
@@ -337,12 +385,6 @@ public class BookingUserScreen extends JFrame {
 			    comboboxSelectionChange();	
 			}
 		});
-		movieTimeCombobox.setBounds(122, 82, 218, 33);
-		getContentPane().add(movieTimeCombobox);
-		movieTimeLabel = new JLabel("Suất chiếu");
-		movieTimeLabel.setFont(new Font("Tahoma", Font.PLAIN, 20));
-		movieTimeLabel.setBounds(20, 77, 107, 38);
-		contentPane.add(movieTimeLabel);
 		setVisible(true);
 		
 		/// Add event for components

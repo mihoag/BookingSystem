@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
+import models.Movie;
 import models.MovieTime;
 import views.BookingUserScreen;
 
@@ -43,14 +44,14 @@ public class ClientThread extends Thread {
 	}
     
     
-    public void initData(List<MovieTime> movieTimes)
+    public void initData(List<Movie> movies)
     {
-    	view.initData(movieTimes);
+    	view.initData(movies);
     }
     
-    public void updateData(List<MovieTime> movieTimes)
+    public void updateData(List<Movie> movies)
     {
-        view.updateData(movieTimes);
+        view.updateData(movies);
     }
     
     public void showDisconnectedMessage()

@@ -8,14 +8,17 @@ import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 
 import controllers.ConfigServerScreenController;
+import models.Movie;
 import models.MovieTheater;
 import models.MovieTime;
 import models.Seat;
 import models.User;
 import models.Zone;
+import service.MovieService;
 import service.MovieTimeService;
 import threads.ServerThread;
 import threads.UserThread;
+import utils.MovieUtils;
 import utils.TimeZoneUtitls;
 
 import java.awt.Toolkit;
@@ -42,19 +45,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.awt.event.ActionEvent;
+import javax.swing.ComboBoxModel;
 
 public class ConfigServerScreen extends JFrame {
  
 	private static final long serialVersionUID = 1L;
 	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 	
-	
 	// Components for UI
 	private JLabel header; 
 	private JPanel stageMapPanel;
 	private JLabel movieTimeLabel;
-	public DefaultComboBoxModel<String> modelCombobox;
-	private JComboBox movieTimeCombobox;
+	public DefaultComboBoxModel<String> MovieTimeModelCombobox;
+	public JComboBox movieTimeCombobox;
 	public JButton stageConfigButton;
 	private JLabel userAccessNumLabel;
 	private JLabel movieTimeConfigLabel;
@@ -69,16 +72,17 @@ public class ConfigServerScreen extends JFrame {
 	private JLabel movieScreenTitleLabel;
 	private JLabel userNumLabel;
 	public ServerThread serverThread;
+	public DefaultComboBoxModel<String> movieModelCombobox;
+	public JComboBox movieNameCombobox;
+	private JLabel labelMovieName;
+	public JButton movieConfigButton;
 
-	/**
-	 * Launch the application.
-	*/
+
 	
 	public void updateUserNum(Integer userNum)
 	{
 	   userNumLabel.setText(userNum + "");	
 	}
-
 	public void drawSeatMap(MovieTheater movieTheater)
 	{
 	    stageMapPanel.removeAll();
@@ -109,11 +113,12 @@ public class ConfigServerScreen extends JFrame {
 	                   StringBuilder strBuilder = new StringBuilder();
 	                   strBuilder.append("Suất chiếu: ").append(zoneTime).append("\n").append("Họ tên người đặt: ").append(user.getFullname()).append("\n").append("Số điện thoại: ").append(user.getTel());
 	                   seatButton.addActionListener(new ActionListener() {
-						@Override
-						public void actionPerformed(ActionEvent e) {
+					  
+	                   @Override
+					   public void actionPerformed(ActionEvent e) {
 							// TODO Auto-generated method stub
 							JOptionPane.showMessageDialog(stageMapPanel,strBuilder.toString(), title, JOptionPane.INFORMATION_MESSAGE);
-						}
+					   }
 					});
 	                }
 	                else
@@ -136,37 +141,86 @@ public class ConfigServerScreen extends JFrame {
 	public void updateMovieTimeCombobox(String timeZoneValue)
 	{
 		try {
-			modelCombobox.removeAllElements();
-			List<String> movieTimes = movieTimeService.getMovieTimeAsString();
+			MovieTimeModelCombobox.removeAllElements();
+			
+			String movieName = (String) movieModelCombobox.getSelectedItem();
+
+			List<String> movieTimes = MovieService.getInstance().getMovieTimeAsString(movieName);
+			
 			for(String str : movieTimes)
 			{
-				modelCombobox.addElement(str);
+				MovieTimeModelCombobox.addElement(str);
+			}
+			
+			if(timeZoneValue != null && movieTimes.contains(timeZoneValue))
+			{
+				MovieTimeModelCombobox.setSelectedItem(timeZoneValue);
+			}
+			updateSeatMap();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	
+	}
+	public void updateTextField()
+	{
+		String movieTime = (String) movieTimeCombobox.getSelectedItem();
+		if(movieTime != null)
+		{
+			String[] components = TimeZoneUtitls.splitTimeZone(movieTime);
+			setTextField(components[0], components[1]);
+		}
+		else
+		{
+			resetTextField();
+		}
+		
+	}
+	
+	public void updateMovieCombobox(String movieName)
+	{
+		try {
+			movieModelCombobox.removeAllElements();
+			List<String> movieNames = MovieService.getInstance().getMovieAsString();
+			for(String str : movieNames)
+			{
+				movieModelCombobox.addElement(str);
+			}
+			
+			if(movieName != null)
+			{
+				if(movieNames.contains(movieName))
+				{
+					movieModelCombobox.setSelectedItem(movieName);
+				}
 			}
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		if(timeZoneValue != null)
-		{
-			modelCombobox.setSelectedItem(timeZoneValue);
-			updateSeatMap();
-		}
+		
+		String timeZone = (String) movieTimeCombobox.getSelectedItem();
+		updateMovieTimeCombobox(timeZone);
 	}
 	
 	public void updateSeatMap()
 	{
 		// Update seat map
+		String movieName = (String) movieModelCombobox.getSelectedItem();
 		String timeZoneValue = (String)movieTimeCombobox.getSelectedItem();
-	
-		if(timeZoneValue != null)
+
+		if(movieName != null && timeZoneValue != null)
 		{
+			
 			List<LocalTime> timeZoneComponents = TimeZoneUtitls.getTimeZoneFromString(timeZoneValue);
 			// Set text for text field
 			setTextField(timeZoneComponents.get(0).format(formatter), timeZoneComponents.get(1).format(formatter));
 			
 			if(timeZoneComponents.get(0) != null && timeZoneComponents.get(1) != null)
 			{
-				MovieTime movieTime = movieTimeService.getMovieTimeFromTimeZone(timeZoneComponents.get(0),timeZoneComponents.get(1));
+				MovieTime movieTime = MovieService.getInstance().getMovieTimeFromTimeZone(movieName, timeZoneComponents.get(0),timeZoneComponents.get(1));
 				if(movieTime !=null)
 				{	
 					drawSeatMap(movieTime.getMovieTheater());
@@ -181,20 +235,14 @@ public class ConfigServerScreen extends JFrame {
 	
 	public void initData()
 	{
-		updateMovieTimeCombobox(null);	
-		updateSeatMap();
+		updateMovieCombobox(null);
+		updateTextField();
 	}
 	
-	public void updateView(List<MovieTime> movieTimes)
+	public void updateView()
 	{	
-		String timeZoneValue = (String) movieTimeCombobox.getSelectedItem();
-		List<String> timeZoneAsString = TimeZoneUtitls.getListTimeZoneAsString(movieTimes);
-		if(!timeZoneAsString.contains(timeZoneValue))
-		{
-			timeZoneValue = null;
-		}
-	    updateMovieTimeCombobox(timeZoneValue);
-	    updateSeatMap();
+		String movieName = (String) movieNameCombobox.getSelectedItem();
+		updateMovieCombobox(movieName);
 	}
 	
 	public void comboboxSelectionChange()
@@ -226,15 +274,7 @@ public class ConfigServerScreen extends JFrame {
 	
 	public void addEventForComponent()
 	{ 
-        movieTimeCombobox.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				comboboxSelectionChange();
-			}
-		});
-
+       
 		this.addWindowListener(new WindowListener() {
 			
 			@Override
@@ -290,6 +330,34 @@ public class ConfigServerScreen extends JFrame {
 				
 			}
 		});
+		
+	    movieNameCombobox.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+			    updateMovieTimeCombobox(null);	
+			}
+		});
+	    
+	    movieTimeCombobox.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+	    
+	   movieTimeCombobox.addActionListener(new ActionListener() {
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// TODO Auto-generated method stub
+			updateSeatMap();
+		}
+	});
+	    
 	}
 	
 	public ConfigServerScreen()
@@ -305,7 +373,7 @@ public class ConfigServerScreen extends JFrame {
 		
 		header = new JLabel("HỆ THỐNG QUẢN LÍ ĐẶT VÉ XEM PHIM");
 		header.setFont(new Font("Tahoma", Font.BOLD, 30));
-		header.setBounds(170, 0, 753, 98);
+		header.setBounds(170, 10, 753, 64);
 		getContentPane().add(header);
 		
 		stageMapPanel = new JPanel();
@@ -322,72 +390,89 @@ public class ConfigServerScreen extends JFrame {
 		
 		movieTimeLabel = new JLabel("Suất chiếu:");
 		movieTimeLabel.setFont(new Font("Tahoma", Font.PLAIN, 20));
-		movieTimeLabel.setBounds(10, 81, 141, 50);
+		movieTimeLabel.setBounds(581, 191, 141, 50);
 		getContentPane().add(movieTimeLabel);
 		
-		modelCombobox = new DefaultComboBoxModel<>();
-		movieTimeCombobox = new JComboBox(modelCombobox);
+		MovieTimeModelCombobox = new DefaultComboBoxModel<>();
+		movieTimeCombobox = new JComboBox(MovieTimeModelCombobox);
 		movieTimeCombobox.setFont(new Font("Tahoma", Font.PLAIN, 20));
-		movieTimeCombobox.setBounds(125, 92, 218, 33);
+		movieTimeCombobox.setBounds(718, 202, 229, 33);
 		getContentPane().add(movieTimeCombobox);
 		
 		stageConfigButton = new JButton("Cấu hình sân khấu");
-		stageConfigButton.setFont(new Font("Tahoma", Font.PLAIN, 20));
-		stageConfigButton.setBounds(366, 92, 205, 33);
+		stageConfigButton.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		stageConfigButton.setBounds(751, 148, 196, 33);
 		stageConfigButton.addActionListener(ac);
 		getContentPane().add(stageConfigButton);
 		
 		userAccessNumLabel = new JLabel("Số lượng người đang truy cập:");
 		userAccessNumLabel.setFont(new Font("Tahoma", Font.PLAIN, 20));
-		userAccessNumLabel.setBounds(581, 141, 272, 43);
+		userAccessNumLabel.setBounds(581, 95, 272, 43);
 		getContentPane().add(userAccessNumLabel);
 		
 		movieTimeConfigLabel = new JLabel("Cấu hình suất chiếu");
 		movieTimeConfigLabel.setFont(new Font("Tahoma", Font.PLAIN, 20));
-		movieTimeConfigLabel.setBounds(581, 194, 287, 43);
+		movieTimeConfigLabel.setBounds(581, 240, 287, 43);
 		
 		getContentPane().add(movieTimeConfigLabel);
 		
 		timeStartLabel = new JLabel("Giờ bắt đầu");
 		timeStartLabel.setFont(new Font("Tahoma", Font.PLAIN, 20));
-		timeStartLabel.setBounds(581, 238, 133, 43);
+		timeStartLabel.setBounds(581, 288, 133, 43);
 		getContentPane().add(timeStartLabel);
 		
 		timeEndLabel = new JLabel("Giờ kết thúc");
 		timeEndLabel.setFont(new Font("Tahoma", Font.PLAIN, 20));
-		timeEndLabel.setBounds(581, 285, 141, 43);
+		timeEndLabel.setBounds(581, 335, 141, 43);
 		getContentPane().add(timeEndLabel);
 	
 		createTimeBtn = new JButton("Thêm");
-		createTimeBtn.setFont(new Font("Tahoma", Font.PLAIN, 20));
-		createTimeBtn.setBounds(613, 354, 85, 35);
+		createTimeBtn.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		createTimeBtn.setBounds(657, 392, 85, 35);
 		createTimeBtn.addActionListener(ac);
 		getContentPane().add(createTimeBtn);
 		
 		deleteTimeBtn = new JButton("Xóa");
-		deleteTimeBtn.setFont(new Font("Tahoma", Font.PLAIN, 20));
-		deleteTimeBtn.setBounds(738, 354, 85, 35);
+		deleteTimeBtn.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		deleteTimeBtn.setBounds(758, 392, 85, 35);
 	    deleteTimeBtn.addActionListener(ac);
 		getContentPane().add(deleteTimeBtn);
 		
 		timeStartText = new JTextField();
 		timeStartText.setFont(new Font("Tahoma", Font.PLAIN, 20));
-		timeStartText.setBounds(697, 238, 150, 34);
+		timeStartText.setBounds(718, 288, 229, 34);
 		getContentPane().add(timeStartText);
 		timeStartText.setColumns(10);
 		
 		timeEndText = new JTextField();
 		timeEndText.setFont(new Font("Tahoma", Font.PLAIN, 20));
 		timeEndText.setColumns(10);
-		timeEndText.setBounds(697, 291, 150, 34);
+		timeEndText.setBounds(718, 341, 229, 34);
 		getContentPane().add(timeEndText);
 		
 		userNumLabel = new JLabel("0");
 		userNumLabel.setForeground(new Color(255, 0, 0));
 		userNumLabel.setFont(new Font("Tahoma", Font.PLAIN, 20));
-		userNumLabel.setBounds(856, 141, 31, 43);
+		userNumLabel.setBounds(863, 95, 31, 43);
 		getContentPane().add(userNumLabel);
-		this.setSize(901, 600);
+		
+		labelMovieName = new JLabel("Tên phim:");
+		labelMovieName.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		labelMovieName.setBounds(10, 89, 141, 50);
+		getContentPane().add(labelMovieName);
+		
+		movieModelCombobox = new DefaultComboBoxModel<>();
+		movieNameCombobox = new JComboBox(movieModelCombobox);
+		movieNameCombobox.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		movieNameCombobox.setBounds(106, 98, 465, 33);
+		getContentPane().add(movieNameCombobox);
+		
+		movieConfigButton = new JButton("Cấu hình phim");
+		movieConfigButton.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		movieConfigButton.setBounds(581, 148, 161, 33);
+		movieConfigButton.addActionListener(ac);
+		getContentPane().add(movieConfigButton);
+		this.setSize(976, 600);
 		setBackground(new Color(236, 200, 123));
 		
 		

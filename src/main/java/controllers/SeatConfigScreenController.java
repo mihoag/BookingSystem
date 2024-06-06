@@ -6,8 +6,11 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
+import models.Movie;
 import models.MovieTime;
+import service.MovieService;
 import service.MovieTimeService;
+import utils.TimeZoneUtitls;
 import views.ConfigServerScreen;
 import views.SeatConfigScreen;
 
@@ -25,9 +28,9 @@ public class SeatConfigScreenController implements ActionListener{
 	}
 	
 	  
-    public void configBroadcast(List<MovieTime> movieTimes)
+    public void configBroadcast(List<Movie> movies)
     {
-    	this.serverView.serverThread.broadcast(movieTimes);
+    	this.serverView.serverThread.broadcast(movies);
     }
 	
     public boolean isNumeric(String str) {
@@ -77,8 +80,9 @@ public class SeatConfigScreenController implements ActionListener{
 	     if(e.getSource() == view.addBtn)
 	     {
 	    	 try {
+	    		String movieName = (String) serverView.movieModelCombobox.getSelectedItem();
 	    		// Check if exist movie time
-	    		List<MovieTime> lsMovieTime = service.getMovieTimes();
+	    		List<MovieTime> lsMovieTime = MovieService.getInstance().getListMovieTimesFromMovie(movieName);
 	    		if(lsMovieTime.size() == 0)
 	    		{
 	    			JOptionPane.showMessageDialog(view, "Danh sách suất chiếu đang rỗng. Cần thêm 1 suất chiếu trước!");
@@ -94,20 +98,26 @@ public class SeatConfigScreenController implements ActionListener{
 	 	        Integer rowNum = Integer.parseInt(view.rowNumTextField.getText());  
 	 	        Integer seatNumPerRow = Integer.parseInt(view.seatNumPerRowText.getText());
 	 	        Double price = Double.parseDouble(view.priceTextField.getText());
-	 	         	        
+	 	         
+	 	        ///
+	 	        String movieTime = (String) serverView.MovieTimeModelCombobox.getSelectedItem();
+	 	        String[] components  = TimeZoneUtitls.splitTimeZone(movieTime);
+	 	       
+	 	        /////
+	 	        
 	 	        /// 
-	 	        boolean check = service.addZone(name, rowNum, seatNumPerRow, price);
+	 	        boolean check = MovieService.getInstance().addZone(movieName, components[0], components[1],name, rowNum, seatNumPerRow, price);
 	 	        if(check)
 	 	        {
 	 	           JOptionPane.showMessageDialog(view, "Thêm khu thành công");
-	 	           // updata table
+	 	           // update table
 	 	           view.zoneInfoTableModel.addRow(new Object[] {name, rowNum, seatNumPerRow, price});
 	 	           view.resetTextField();
 	 	           // update seat map
 	 	           serverView.updateSeatMap();
 	 	           // update client
-	 	           List<MovieTime> movieTimes = service.getMovieTimes();
-	 	           configBroadcast(movieTimes);
+	 	           //List<MovieTime> movieTimes = service.getMovieTimes();
+	 	           //configBroadcast(movieTimes);
 	 	        }
 	 	        else
 	 	        {
@@ -118,20 +128,26 @@ public class SeatConfigScreenController implements ActionListener{
 				JOptionPane.showMessageDialog(view, e2.getMessage());
 			}
 	     } 
+	     
 	     else if(e.getSource() == view.deleteBtn)
 	     {
 	        try {
 	        	int cnt =  view.zoneInfoTable.getSelectedRow();
 				String zoneName = (String) view.zoneInfoTable.getValueAt(cnt, 0);
-				Boolean check = service.deleteZoneByName(zoneName);
+				String movieName = (String) serverView.movieModelCombobox.getSelectedItem();
+				String zoneTime = (String) serverView.movieTimeCombobox.getSelectedItem();
+				String[] components = TimeZoneUtitls.splitTimeZone(zoneTime);
+				
+			    boolean check = MovieService.getInstance().deleteZoneByName(movieName, components[0], components[1], zoneName);
 				
 				if(check)
 				{
 				   view.updateZoneTable();
 				   serverView.updateSeatMap();
 				   // update client
-	 	           List<MovieTime> movieTimes = service.getMovieTimes();
-	 	           configBroadcast(movieTimes);  
+	 	       
+				   //List<MovieTime> movieTimes = service.getMovieTimes();
+	 	           //configBroadcast(movieTimes);  
 				   JOptionPane.showMessageDialog(view, "Xóa khu thành công");
 			    }
 				else

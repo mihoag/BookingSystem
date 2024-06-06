@@ -5,4 +5,11 @@
   <version>1.0.0</version>
   <name>BookingSystem</name>
   <description>Build a system to book tickets for the event ( using socket and multithread)</description>
+  <dependencies>
+	  <dependency>
+            <groupId>com.toedter</groupId>
+            <artifactId>jcalendar</artifactId>
+            <version>1.4</version>
+        </dependency>
+  </dependencies>
 </project>

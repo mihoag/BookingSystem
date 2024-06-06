@@ -11,7 +11,9 @@ import javax.swing.table.DefaultTableModel;
 
 import controllers.SeatConfigScreenController;
 import models.Zone;
+import service.MovieService;
 import service.MovieTimeService;
+import utils.TimeZoneUtitls;
 
 import java.awt.Toolkit;
 import javax.swing.JLabel;
@@ -52,12 +54,20 @@ public class SeatConfigScreen extends JFrame {
     public void updateZoneTable()
     {
     	 zoneInfoTableModel.setRowCount(0);
-    	 List<Zone> listZone = service.getListZones();
     	 
-         for(Zone zone : listZone)
-         {
-      	   zoneInfoTableModel.addRow(new Object[] {zone.getName(), zone.getRowNum(), zone.getSeatsPerRow(), zone.getPrice()});  
-         }
+    	 String movieName = (String) configScreen.movieNameCombobox.getSelectedItem();
+    	 String movieTime = (String) configScreen.movieTimeCombobox.getSelectedItem();
+    	 if(movieName != null && movieTime != null)
+    	 {
+    		 String[] components = TimeZoneUtitls.splitTimeZone(movieTime);
+        	 
+        	 List<Zone> listZone =  MovieService.getInstance().getListZoneFromMovieTime(movieName, components[0], components[1]);
+        	 
+             for(Zone zone : listZone)
+             {
+          	   zoneInfoTableModel.addRow(new Object[] {zone.getName(), zone.getRowNum(), zone.getSeatsPerRow(), zone.getPrice()});  
+             }
+    	 }
     }
     
     public void resetTextField()

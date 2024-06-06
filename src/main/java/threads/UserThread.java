@@ -4,7 +4,9 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
+import models.Movie;
 import models.MovieTime;
+import service.MovieService;
 import service.MovieTimeService;
 import service.UserService;
 import views.ConfigServerScreen;
@@ -31,8 +33,8 @@ public class UserThread extends Thread {
 		try {
 			writer = new ObjectOutputStream(socket.getOutputStream()); 	
 		     // Send initial data and send to client
-			List<MovieTime> listMovieTimes = service.getMovieTimes();
-			writer.writeObject(listMovieTimes);
+			List<Movie> listMovies = MovieService.getInstance().getMovies();
+			writer.writeObject(listMovies);
 			writer.flush();
 		
 			reader = new ObjectInputStream(socket.getInputStream());
@@ -42,10 +44,10 @@ public class UserThread extends Thread {
 			   {
 				   break;
 			   }
-			   service.bookMovieSeat(bookingInfo);
-			   List<MovieTime> listUpdateMovieTime = service.getMovieTimes();
-			   server.broadcast(listUpdateMovieTime);
-			   server.updateView(listUpdateMovieTime);
+			   //service.bookMovieSeat(bookingInfo);
+			   //List<MovieTime> listUpdateMovieTime = service.getMovieTimes();
+			   //server.broadcast(listUpdateMovieTime);
+			   //server.updateView(listUpdateMovieTime);
 			} while (true);
 			
 			socket.close();
@@ -64,7 +66,7 @@ public class UserThread extends Thread {
 	  * Sends a object to the client.
 	*/
 	
-	void sendUpdatedData(List<MovieTime> data) {
+	void sendUpdatedData(List<Movie> data) {
 		try {
 			writer.writeObject(data);
 		} catch (IOException e) {

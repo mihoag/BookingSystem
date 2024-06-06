@@ -19,7 +19,6 @@ public class RegisterScreenController implements ActionListener{
 	private UserService service;
 	
 	
-	
 	public RegisterScreenController(RegisterScreen view, LoginScreen loginView)
 	{
 		this.loginView = loginView;
