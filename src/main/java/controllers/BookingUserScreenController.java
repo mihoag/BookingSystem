@@ -23,12 +23,12 @@ public class BookingUserScreenController implements ActionListener{
 		// TODO Auto-generated method stub
 		if(e.getSource() instanceof JButton)
 		{
-			
+			String movieName = (String) view.movieNameCombobox.getSelectedItem();
 			String username = view.user.getUsername();
 			String zoneTime = (String) view.movieTimeCombobox.getSelectedItem();
 			String seatId = e.getActionCommand();
 			
-			String bookingInfo = username + "|" + zoneTime + "|" + seatId;
+			String bookingInfo = username + "|" + zoneTime + "|" + movieName + "|"+ seatId;
 			
 			view.clientThread.userWriteThread.sendBookingDataToServer(bookingInfo);
 		}

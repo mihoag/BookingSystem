@@ -9,9 +9,9 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
+import models.Movie;
 import models.MovieTime;
 import service.MovieService;
-import service.MovieTimeService;
 import views.ConfigServerScreen;
 import views.MovieConfigScreen;
 import views.SeatConfigScreen;
@@ -20,15 +20,19 @@ public class MovieConfigScreenController implements ActionListener {
 
 
 	private MovieConfigScreen movieConfigView;
-	private MovieTimeService service;
 	private ConfigServerScreen serverView;
 	
 	public MovieConfigScreenController(MovieConfigScreen movieConfigView, ConfigServerScreen serverView)
 	{
 		this.movieConfigView = movieConfigView;
 		this.serverView = serverView;
-		service = new MovieTimeService();
 	}
+	
+	public void configBroadcast(List<Movie> movies)
+    {
+    	this.serverView.serverThread.broadcast(movies);
+    }
+	
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -69,6 +73,10 @@ public class MovieConfigScreenController implements ActionListener {
 		    	   // update table
 		    	   movieConfigView.updateTable();
 	 	           serverView.updateMovieCombobox(movieName);
+	 	           
+	 	           // Update client
+				   List<Movie> movies = MovieService.getInstance().getMovies();
+				   configBroadcast(movies);
 		       }
 		       else
 		       {  
@@ -88,6 +96,11 @@ public class MovieConfigScreenController implements ActionListener {
 				   // update table
 			       movieConfigView.updateTable();
 		 	       serverView.updateMovieCombobox(null);
+		 	       
+		 	       // Update client
+				   List<Movie> movies = MovieService.getInstance().getMovies();
+				   configBroadcast(movies);
+		 	      
 		 	       JOptionPane.showMessageDialog(movieConfigView, "Xóa phim thành công");
 			    }
 				else

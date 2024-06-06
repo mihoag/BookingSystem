@@ -15,7 +15,6 @@ import models.Seat;
 import models.User;
 import models.Zone;
 import service.MovieService;
-import service.MovieTimeService;
 import threads.ServerThread;
 import threads.UserThread;
 import utils.MovieUtils;
@@ -65,7 +64,6 @@ public class ConfigServerScreen extends JFrame {
 	private JLabel timeEndLabel;
 	public JButton createTimeBtn;
 	public JButton deleteTimeBtn;	
-	private MovieTimeService movieTimeService;
 	public JTextField timeStartText;
 	public JTextField timeEndText;
 	private JPanel movieScreenPanel;
@@ -76,7 +74,9 @@ public class ConfigServerScreen extends JFrame {
 	public JComboBox movieNameCombobox;
 	private JLabel labelMovieName;
 	public JButton movieConfigButton;
-
+	private JButton bookedBtn;
+	private JButton btnChat;
+    public JButton listBookedSeatBtn;
 
 	
 	public void updateUserNum(Integer userNum)
@@ -369,8 +369,7 @@ public class ConfigServerScreen extends JFrame {
 		getContentPane().setLayout(null);
 		serverThread = new ServerThread(this);
 		ConfigServerScreenController ac = new ConfigServerScreenController(this);
-		movieTimeService = new MovieTimeService();
-		
+
 		header = new JLabel("HỆ THỐNG QUẢN LÍ ĐẶT VÉ XEM PHIM");
 		header.setFont(new Font("Tahoma", Font.BOLD, 30));
 		header.setBounds(170, 10, 753, 64);
@@ -472,6 +471,25 @@ public class ConfigServerScreen extends JFrame {
 		movieConfigButton.setBounds(581, 148, 161, 33);
 		movieConfigButton.addActionListener(ac);
 		getContentPane().add(movieConfigButton);
+		
+		listBookedSeatBtn = new JButton("Danh sách đặt vé");
+		listBookedSeatBtn.setBounds(581, 465, 211, 31);
+		listBookedSeatBtn.addActionListener(ac);
+		getContentPane().add(listBookedSeatBtn);
+		listBookedSeatBtn.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		
+		bookedBtn = new JButton("Đã đặt");
+		bookedBtn.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		bookedBtn.setBounds(581, 506, 92, 31);
+		bookedBtn.setBackground(Color.LIGHT_GRAY);
+		getContentPane().add(bookedBtn);
+		
+		
+		btnChat = new JButton("Chưa đặt");
+		btnChat.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		btnChat.setBounds(685, 506, 107, 31);
+		btnChat.setBackground(Color.GREEN);
+		getContentPane().add(btnChat);
 		this.setSize(976, 600);
 		setBackground(new Color(236, 200, 123));
 		

@@ -7,7 +7,6 @@ import java.util.*;
 import models.Movie;
 import models.MovieTime;
 import service.MovieService;
-import service.MovieTimeService;
 import service.UserService;
 import views.ConfigServerScreen;
 
@@ -20,13 +19,12 @@ public class UserThread extends Thread {
 	private ServerThread server;
 	private ObjectOutputStream writer;
 	private ObjectInputStream reader;
-	private MovieTimeService service;
+	
 
 	public UserThread(Socket socket, ServerThread server) 
 	{
 		this.socket = socket;
 		this.server = server;
-		service = new MovieTimeService();
 	}
 	
 	public void run() {
@@ -44,10 +42,15 @@ public class UserThread extends Thread {
 			   {
 				   break;
 			   }
-			   //service.bookMovieSeat(bookingInfo);
-			   //List<MovieTime> listUpdateMovieTime = service.getMovieTimes();
-			   //server.broadcast(listUpdateMovieTime);
-			   //server.updateView(listUpdateMovieTime);
+			   
+			   System.out.println(bookingInfo);
+			   MovieService.getInstance().bookMovieSeat(bookingInfo);
+			   
+			   
+			   List<Movie> movies = MovieService.getInstance().getMovies();
+			   server.broadcast(movies);
+			   server.updateView();
+			   
 			} while (true);
 			
 			socket.close();

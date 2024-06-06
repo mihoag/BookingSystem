@@ -8,6 +8,8 @@ import java.util.List;
 
 import models.Movie;
 import models.MovieTime;
+import models.Seat;
+import models.User;
 import models.Zone;
 import repository.MovieRepository;
 import repository.MovieTimeRepository;
@@ -293,4 +295,51 @@ public class MovieService {
 		}
     	return null;
      }
+     
+     public synchronized void bookMovieSeat(String bookingInfo)
+     {
+    	 List<Object> bookingInfoComponents = TimeZoneUtitls.getBookingInfoFromString(bookingInfo);
+    	 String username = (String) bookingInfoComponents.get(0);
+    	 
+    	 String movieName =  (String) bookingInfoComponents.get(6);
+    	 Movie movie = MovieService.getInstance().getMovieFromMovieName(movieName);
+    	 
+    	 MovieTime movieTime = MovieUtils.getMovieTimeFromTimeZone(movie.getMovieTimes(),(LocalTime)bookingInfoComponents.get(1),(LocalTime)bookingInfoComponents.get(2));
+    	 String zoneName = (String) bookingInfoComponents.get(3);
+    	 Integer row = (Integer) bookingInfoComponents.get(4);
+    	 Integer col = (Integer) bookingInfoComponents.get(5);
+    	 
+    	 if(movieTime != null)
+    	 {
+    		 List<Zone> listZones = movieTime.getMovieTheater().getListZone();
+    		 for(Zone zone : listZones)
+    		 {
+    			 if(zone.getName().equals(zoneName))
+    			 {
+    				 User user = userService.getUserByUsername(username);
+    				 Seat seat = zone.getSeats().get(row).get(col);
+    				 System.out.println(seat.isStatus());
+    				 if(!seat.isStatus())
+    				 {
+    					seat.setStatus(true);
+    					seat.setUser(user);
+    				 }
+    				 break;
+    			 }
+    		 }
+    		 updateSeat(movie);
+    	 }
+     }
+     
+     public synchronized void updateSeat(Movie movie)
+     {
+    	List<Movie> movies = getMovies();
+		if(movies.contains(movie))
+		{
+			int index = movies.indexOf(movie);
+			movies.set(index, movie);
+		}
+		MovieRepository.getInstance().writeMovieData(movies);
+     }
+     
 }

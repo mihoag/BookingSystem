@@ -12,7 +12,6 @@ import javax.swing.table.DefaultTableModel;
 import controllers.SeatConfigScreenController;
 import models.Zone;
 import service.MovieService;
-import service.MovieTimeService;
 import utils.TimeZoneUtitls;
 
 import java.awt.Toolkit;
@@ -43,8 +42,7 @@ public class SeatConfigScreen extends JFrame {
 	private JLabel zoneNameLabel;
 	private JLabel seatNumPerRowLabel;
     private ConfigServerScreen configScreen;
-    private MovieTimeService service;
-	
+  
 	
     public void initData()
     {
@@ -131,7 +129,6 @@ public class SeatConfigScreen extends JFrame {
     
 	public SeatConfigScreen(ConfigServerScreen configScreen) {
 		this.configScreen = configScreen;
-		service = new MovieTimeService();
 		setResizable(false);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(SeatConfigScreen.class.getResource("/assets/serverIcon.png")));
 		setBounds(100, 100, 816, 525);

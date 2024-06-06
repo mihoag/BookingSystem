@@ -55,9 +55,9 @@ public class ServerThread extends Thread {
    		}
    	}
    	
-   	public void updateView(List<Movie> movies)
+   	public void updateView()
    	{
-   	   view.updateView(movies);
+   	   view.updateView();
    	}
    	
    	public void removeUser(UserThread userThread)

@@ -9,7 +9,6 @@ import javax.swing.JOptionPane;
 import models.Movie;
 import models.MovieTime;
 import service.MovieService;
-import service.MovieTimeService;
 import utils.TimeZoneUtitls;
 import views.ConfigServerScreen;
 import views.SeatConfigScreen;
@@ -17,14 +16,12 @@ import views.SeatConfigScreen;
 public class SeatConfigScreenController implements ActionListener{
 
 	private SeatConfigScreen view;
-	private MovieTimeService service;
 	private ConfigServerScreen serverView;
     
 	public SeatConfigScreenController(SeatConfigScreen view, ConfigServerScreen serverScreen)
 	{
 		this.view = view;
 		this.serverView = serverScreen;
-		service = new MovieTimeService();
 	}
 	
 	  
@@ -38,7 +35,7 @@ public class SeatConfigScreenController implements ActionListener{
             return false;
         }
         try {
-            Integer.parseInt(str);
+            Double.parseDouble(str);
             return true;
         } catch (NumberFormatException e) {
             return false;
@@ -102,9 +99,7 @@ public class SeatConfigScreenController implements ActionListener{
 	 	        ///
 	 	        String movieTime = (String) serverView.MovieTimeModelCombobox.getSelectedItem();
 	 	        String[] components  = TimeZoneUtitls.splitTimeZone(movieTime);
-	 	       
-	 	        /////
-	 	        
+
 	 	        /// 
 	 	        boolean check = MovieService.getInstance().addZone(movieName, components[0], components[1],name, rowNum, seatNumPerRow, price);
 	 	        if(check)
@@ -116,8 +111,8 @@ public class SeatConfigScreenController implements ActionListener{
 	 	           // update seat map
 	 	           serverView.updateSeatMap();
 	 	           // update client
-	 	           //List<MovieTime> movieTimes = service.getMovieTimes();
-	 	           //configBroadcast(movieTimes);
+				   List<Movie> movies = MovieService.getInstance().getMovies();
+				   configBroadcast(movies);
 	 	        }
 	 	        else
 	 	        {
@@ -143,18 +138,16 @@ public class SeatConfigScreenController implements ActionListener{
 				if(check)
 				{
 				   view.updateZoneTable();
-				   serverView.updateSeatMap();
+				   serverView.updateSeatMap();  
 				   // update client
-	 	       
-				   //List<MovieTime> movieTimes = service.getMovieTimes();
-	 	           //configBroadcast(movieTimes);  
+					List<Movie> movies = MovieService.getInstance().getMovies();
+					configBroadcast(movies);
 				   JOptionPane.showMessageDialog(view, "Xóa khu thành công");
 			    }
 				else
 				{
 					JOptionPane.showMessageDialog(view, "Xóa khu thất bại");
-				}
-				
+				}	
 			} catch (Exception e2) {
 				// TODO: handle exception
 				JOptionPane.showMessageDialog(view, e2.getMessage());

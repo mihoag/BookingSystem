@@ -4,12 +4,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-import service.MovieTimeService;
 
 public class ConfigThread extends Thread {
 	private Socket socket;
 	private ServerThread server;
-	private MovieTimeService service;
 	
 	public ConfigThread(Socket socket, ServerThread server)
 	{

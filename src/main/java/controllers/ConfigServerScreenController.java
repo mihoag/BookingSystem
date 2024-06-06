@@ -10,11 +10,11 @@ import javax.swing.JOptionPane;
 import models.Movie;
 import models.MovieTime;
 import service.MovieService;
-import service.MovieTimeService;
 import utils.TimeZoneUtitls;
 import views.ConfigServerScreen;
 import views.MovieConfigScreen;
 import views.SeatConfigScreen;
+import views.UserBookingInfo;
 
 public class ConfigServerScreenController implements ActionListener{
     private ConfigServerScreen view;
@@ -55,8 +55,9 @@ public class ConfigServerScreenController implements ActionListener{
 			{
 				JOptionPane.showMessageDialog(view, "Thêm suất chiếu thành công");
 				this.view.updateMovieTimeCombobox(TimeZoneUtitls.getTimeZoneValueAsString(fromTime, toTime));
-				//List<MovieTime> movieTimes = movieTheaterSer.getMovieTimes();
-				//configBroadcast(movieTimes);
+				
+				List<Movie> movies = MovieService.getInstance().getMovies();
+				configBroadcast(movies);
 			}
 			else
 			{
@@ -96,6 +97,12 @@ public class ConfigServerScreenController implements ActionListener{
 		{
 		   new MovieConfigScreen(view);
 		}
-		
+		else if(e.getSource() == view.listBookedSeatBtn)
+		{
+		    String movieName = (String) view.movieNameCombobox.getSelectedItem();
+		    String zoneTime = (String) view.movieTimeCombobox.getSelectedItem();
+		    
+		    new UserBookingInfo(movieName, zoneTime);
+		}
 	}
 }

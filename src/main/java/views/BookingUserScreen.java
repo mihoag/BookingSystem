@@ -21,7 +21,6 @@ import models.User;
 import models.Zone;
 import repository.MovieTimeRepository;
 import service.MovieService;
-import service.MovieTimeService;
 import threads.ClientThread;
 import utils.MovieUtils;
 import utils.TimeZoneUtitls;
@@ -60,7 +59,7 @@ public class BookingUserScreen extends JFrame {
     public ClientThread clientThread;
     private JLabel movieNameLabel;
     private DefaultComboBoxModel<String> movieNameModelCombobox;
-    private JComboBox<String> movieNameCombobox;
+    public JComboBox<String> movieNameCombobox;
     private JLabel lblImage;
     private JPanel imagePanel;
 	
